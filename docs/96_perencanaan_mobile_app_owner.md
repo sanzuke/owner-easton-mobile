@@ -288,8 +288,8 @@ hijau/merah muda utk status Payment/Invoice), struktur navigasi 4-tab (Beranda/T
 sendiri), dan gaya kartu/badge semua disesuaikan ulang setelah user feedback "layout belum sesuai
 dengan design artifact nya, mohon di sesuaikan persis sama":
 - **Login:** badge ikon olive + logo Easton Park asli (`assets/Easton-logo.png`, dikirim user),
-  kartu putih (Selamat Datang → form Nomor WhatsApp + ID BAST/Unit → tombol Masuk → footer "Butuh
-  bantuan?" dgn kontak WA/telepon/website).
+  kartu putih (Selamat Datang → form Nomor WhatsApp + dropdown "Pilih Unit" searchable → tombol
+  Masuk → footer "Butuh bantuan?" dgn kontak WA/telepon/website).
 - **Dashboard:** banner sambutan olive full-width (pengganti app bar), kartu pengumuman acara
   terdekat (bg biru-ungu + tombol "Konfirmasi Kehadiran" navy, otomatis sembunyi kalau tak ada
   acara yang butuh konfirmasi), kartu tagihan & pemakaian air dgn link, kartu info unit.
@@ -336,3 +336,11 @@ kena lagi kalau setup ulang mesin dev):**
 notif FCM), fitur Tier 2 (bayar langsung, upload KTP/KK dari UI — repository sudah siap tinggal
 pasang picker file), grid Request belum pixel-perfect (desain pakai 5 kategori fix dgn ikon
 berbeda per kategori, implementasi sekarang pakai 1 ikon generik utk semua kategori dinamis).
+
+**Susulan sama hari — Login: field ID BAST diganti dropdown "Pilih Unit" searchable.** Backend
+ternyata sudah expose `GET /api/v1/units?q=` (publik, tanpa auth, filter kode unit — query sama dgn
+dropdown web `db_unit.bast=1 AND bast.hapus=0`), jadi gap yang tadinya dicompromise jadi text field
+polos sekarang ditutup: `UnitPickerField` (ketik ≥1 karakter → debounce 350ms → panel hasil di bawah
+field → pilih → `id_bast` terisi otomatis), persis pola dropdown di desain resmi. File baru:
+`lib/features/auth/data/unit_repository.dart` (model `Unit` + `search()`),
+`lib/features/auth/presentation/unit_picker_field.dart`. `flutter analyze` bersih.
