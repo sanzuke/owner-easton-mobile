@@ -2,6 +2,7 @@
 
 **Status:** F1 (API Backend Tier 1) SELESAI 19 Agustus 2026 (Auth OTP+Sanctum, Dashboard, Tagihan, Riwayat Bayar, Profil, Tiket — semua diverifikasi HTTP asli). F2 (Flutter App Tier 1) MULAI DIKERJAKAN 21 Agustus 2026 — project di-scaffold, layout disesuaikan persis dengan desain resmi, dan berhasil dijalankan di device Android fisik. Lihat update di bagian bawah dokumen.
 **Repo mobile app:** [`github.com/sanzuke/owner-easton-mobile`](https://github.com/sanzuke/owner-easton-mobile) (branch `main`).
+**Desain resmi (Claude Artifact):** [`claude.ai/code/artifact/1b3217fc-0637-4364-b51e-0b33c66be321`](https://claude.ai/code/artifact/1b3217fc-0637-4364-b51e-0b33c66be321) — prototipe interaktif (login → dashboard → tagihan → acara → menu lainnya → request), jadi acuan layout Flutter app (lihat update 21 Agustus). Butuh login akun Claude yang sama dgn pembuat artifact utk diakses.
 **Cakupan disepakati user (8 Agustus 2026):** full parity fitur dengan `ownerdev`, backend API baru di Laravel, platform Flutter (cross-platform Android+iOS).
 **API Reference untuk tim mobile:** lihat [`docs/96b_api_reference_mobile_owner.md`](96b_api_reference_mobile_owner.md) — kontrak endpoint lengkap (request/response/error) supaya development Flutter bisa jalan paralel tanpa baca source Laravel.
 
@@ -278,7 +279,7 @@ Dio + response envelope, secure token storage utk Sanctum, biometric quick-unloc
 `lib/features/<nama>/{data,application,presentation}` per fitur (Riverpod utk state management,
 go_router utk navigasi). Konsumsi API mengikuti kontrak di §3 & endpoint yang sudah jadi di F1.
 
-**Desain resmi (Claude Artifact, link dibagikan user) diterapkan persis setelah akses diberikan** —
+**Desain resmi ([Claude Artifact](https://claude.ai/code/artifact/1b3217fc-0637-4364-b51e-0b33c66be321), link dibagikan user) diterapkan persis setelah akses diberikan** —
 awalnya sempat coba akses tapi artifact butuh login, user login-kan lalu diverifikasi via browser
 otomatis (prototipe interaktif: login → dashboard → tagihan → acara → menu lainnya → request).
 Palet warna (olive/gold brand, navy CTA sekunder, pink utk ikon Request, biru utk Utility, badge
