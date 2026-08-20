@@ -4,7 +4,9 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_envelope.dart';
 import '../../../core/theme/app_colors.dart';
 import '../application/auth_providers.dart';
+import '../data/unit_repository.dart';
 import 'otp_verify_screen.dart';
+import 'unit_picker_field.dart';
 
 /// Layar login — No HP + ID BAST → kirim OTP WhatsApp (lihat docs/96 §2, §3).
 /// Layout mengikuti desain resmi persis: badge ikon + judul brand di atas,
@@ -19,19 +21,21 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _hpController = TextEditingController();
-  final _idBastController = TextEditingController();
+  Unit? _selectedUnit;
   bool _submitting = false;
   String? _errorMessage;
+  String? _unitErrorText;
 
   @override
   void dispose() {
     _hpController.dispose();
-    _idBastController.dispose();
     super.dispose();
   }
 
   Future<void> _submit() async {
-    if (!(_formKey.currentState?.validate() ?? false)) return;
+    final formValid = _formKey.currentState?.validate() ?? false;
+    setState(() => _unitErrorText = _selectedUnit == null ? 'Pilih unit terlebih dahulu' : null);
+    if (!formValid || _selectedUnit == null) return;
     setState(() {
       _submitting = true;
       _errorMessage = null;
@@ -40,7 +44,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       final repo = ref.read(authRepositoryProvider);
       final result = await repo.requestOtp(
         noHp: _hpController.text.trim(),
-        idBast: _idBastController.text.trim(),
+        idBast: _selectedUnit!.idBast,
       );
       if (!mounted) return;
       Navigator.of(context).push(
@@ -157,17 +161,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               ?.copyWith(color: Colors.grey.shade500, fontSize: 11),
                         ),
                         const SizedBox(height: 16),
-                        _FieldLabel('ID BAST / Unit'),
+                        _FieldLabel('Pilih Unit'),
                         const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _idBastController,
-                          decoration: const InputDecoration(
-                            hintText: 'Cari atau masukkan ID unit...',
-                            suffixIcon: Icon(Icons.expand_more),
-                          ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'ID BAST wajib diisi'
-                              : null,
+                        UnitPickerField(
+                          errorText: _unitErrorText,
+                          onSelected: (unit) => setState(() {
+                            _selectedUnit = unit;
+                            _unitErrorText = null;
+                          }),
                         ),
                         if (_errorMessage != null) ...[
                           const SizedBox(height: 12),
