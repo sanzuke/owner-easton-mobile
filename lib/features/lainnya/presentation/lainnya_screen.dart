@@ -5,9 +5,10 @@ import 'package:go_router/go_router.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/widgets/coming_soon_screen.dart';
 import '../../../core/widgets/menu_icon_card.dart';
+import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../profil/presentation/profil_screen.dart';
-import '../../tiket/presentation/tiket_list_screen.dart';
+import '../../tiket/presentation/request_screen.dart';
 
 /// Hub menu lainnya — Request(tiket), Utility, PBB, P3SRS, Pengaturan,
 /// Keluar (mengikuti desain resmi grid 2 kolom).
@@ -35,21 +36,21 @@ class LainnyaScreen extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
-      appBar: AppBar(title: const Text('Lainnya')),
+      appBar: AppBar(
+        title: const Text('Lainnya'),
+        actions: [
+          IconButton(
+            tooltip: 'Profil Saya',
+            icon: const Icon(Icons.person_outline),
+            onPressed: () => Navigator.of(context)
+                .push(MaterialPageRoute(builder: (_) => const ProfilScreen())),
+          ),
+          const NotifikasiBellButton(),
+        ],
+      ),
       body: ListView(
         padding: const EdgeInsets.all(16),
         children: [
-          Card(
-            child: ListTile(
-              leading: const CircleAvatar(child: Icon(Icons.person)),
-              title: const Text('Profil Saya'),
-              subtitle: const Text('Lihat & edit data pribadi'),
-              trailing: const Icon(Icons.chevron_right),
-              onTap: () => Navigator.of(context)
-                  .push(MaterialPageRoute(builder: (_) => const ProfilScreen())),
-            ),
-          ),
-          const SizedBox(height: 16),
           GridView.count(
             crossAxisCount: 2,
             shrinkWrap: true,
@@ -64,7 +65,7 @@ class LainnyaScreen extends ConsumerWidget {
                 title: 'Request',
                 subtitle: 'Perbaikan & bantuan',
                 onTap: () => Navigator.of(context)
-                    .push(MaterialPageRoute(builder: (_) => const TiketListScreen())),
+                    .push(MaterialPageRoute(builder: (_) => const RequestScreen())),
               ),
               MenuIconCard(
                 icon: Icons.water_drop_outlined,

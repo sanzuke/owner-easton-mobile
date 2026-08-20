@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/network/api_envelope.dart';
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../application/acara_providers.dart';
 import '../data/acara_repository.dart';
 
@@ -17,7 +18,7 @@ class AcaraScreen extends ConsumerWidget {
     final listAsync = ref.watch(acaraListProvider);
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Acara')),
+      appBar: AppBar(title: const Text('Acara'), actions: const [NotifikasiBellButton()]),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(acaraListProvider),
         child: listAsync.when(

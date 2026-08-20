@@ -3,14 +3,16 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../pembayaran/presentation/pembayaran_screen.dart';
 import '../application/tagihan_providers.dart';
 import 'tagihan_detail_screen.dart';
 
-/// Daftar tagihan/invoice — Tier 1 (lihat docs/96 §4). Segmented
-/// Invoice/Electricity mengikuti desain resmi; "Electricity" placeholder
-/// karena backend belum expose data listrik terpisah (lihat docs/96 §5).
+/// Daftar tagihan/invoice — Tier 1 (lihat docs/96 §4). Tab Invoice/
+/// Electricity berbentuk kartu ikon (persis desain resmi), bukan segmented
+/// button; "Electricity" placeholder karena backend belum expose data
+/// listrik terpisah (lihat docs/96 §5).
 class TagihanListScreen extends ConsumerStatefulWidget {
   const TagihanListScreen({super.key});
 
@@ -35,104 +37,198 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
             onPressed: () => Navigator.of(context)
                 .push(MaterialPageRoute(builder: (_) => const PembayaranScreen())),
           ),
+          const NotifikasiBellButton(),
         ],
       ),
-      body: Column(
-        children: [
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: SegmentedButton<int>(
-              segments: const [
-                ButtonSegment(value: 0, icon: Icon(Icons.receipt_long), label: Text('INVOICE')),
-                ButtonSegment(value: 1, icon: Icon(Icons.bolt), label: Text('ELECTRICITY')),
+      body: RefreshIndicator(
+        onRefresh: () async => ref.invalidate(tagihanListProvider),
+        child: ListView(
+          padding: const EdgeInsets.all(16),
+          children: [
+            Row(
+              children: [
+                Expanded(
+                  child: _TabTile(
+                    icon: Icons.credit_card,
+                    iconBg: AppColors.invoiceBadgeFg,
+                    label: 'INVOICE',
+                    selected: _segment == 0,
+                    onTap: () => setState(() => _segment = 0),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: _TabTile(
+                    icon: Icons.bolt,
+                    iconBg: const Color(0xFFE0B400),
+                    label: 'ELECTRICITY',
+                    selected: _segment == 1,
+                    onTap: () => setState(() => _segment = 1),
+                  ),
+                ),
               ],
-              selected: {_segment},
-              onSelectionChanged: (s) => setState(() => _segment = s.first),
             ),
-          ),
-          Expanded(
-            child: _segment == 1
-                ? const Center(child: Text('Data listrik segera hadir.'))
-                : RefreshIndicator(
-                    onRefresh: () async => ref.invalidate(tagihanListProvider),
-                    child: listAsync.when(
-                      loading: () => const Center(child: CircularProgressIndicator()),
-                      error: (err, _) => Center(child: Text('Gagal memuat tagihan: $err')),
-                      data: (list) {
-                        if (list.isEmpty) {
-                          return ListView(
-                            children: const [
-                              Padding(
-                                padding: EdgeInsets.only(top: 64),
-                                child: Center(child: Text('Belum ada tagihan.')),
+            const SizedBox(height: 16),
+            if (_segment == 1)
+              const Padding(
+                padding: EdgeInsets.only(top: 48),
+                child: Center(child: Text('Data listrik segera hadir.')),
+              )
+            else
+              listAsync.when(
+                loading: () => const Padding(
+                  padding: EdgeInsets.only(top: 48),
+                  child: Center(child: CircularProgressIndicator()),
+                ),
+                error: (err, _) => Padding(
+                  padding: const EdgeInsets.only(top: 48),
+                  child: Center(child: Text('Gagal memuat tagihan: $err')),
+                ),
+                data: (list) {
+                  if (list.isEmpty) {
+                    return const Padding(
+                      padding: EdgeInsets.only(top: 48),
+                      child: Center(child: Text('Belum ada tagihan.')),
+                    );
+                  }
+                  final terakhir = list.first;
+                  return Column(
+                    crossAxisAlignment: CrossAxisAlignment.stretch,
+                    children: [
+                      Card(
+                        child: Padding(
+                          padding: const EdgeInsets.all(16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              Text('Tagihan Terakhir', style: Theme.of(context).textTheme.bodySmall),
+                              const SizedBox(height: 4),
+                              Text(
+                                formatRupiah(terakhir.total),
+                                style: Theme.of(context)
+                                    .textTheme
+                                    .headlineSmall
+                                    ?.copyWith(fontWeight: FontWeight.bold),
+                              ),
+                              const SizedBox(height: 2),
+                              Text(
+                                '${terakhir.nomorInvoice ?? terakhir.id} · ${terakhir.periode ?? '-'}',
+                                style: Theme.of(context).textTheme.bodySmall,
                               ),
                             ],
-                          );
-                        }
-                        return ListView.separated(
-                          padding: const EdgeInsets.fromLTRB(16, 0, 16, 16),
-                          itemCount: list.length,
-                          separatorBuilder: (context, index) => const SizedBox(height: 8),
-                          itemBuilder: (context, index) {
-                            final tagihan = list[index];
-                            return Card(
-                              child: Padding(
-                                padding: const EdgeInsets.all(16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Expanded(
-                                          child: Text(
-                                            tagihan.nomorInvoice ?? tagihan.id,
-                                            style: Theme.of(context).textTheme.titleSmall,
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      ...list.map(
+                        (tagihan) => Padding(
+                          padding: const EdgeInsets.only(bottom: 8),
+                          child: Card(
+                            child: Padding(
+                              padding: const EdgeInsets.all(16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Expanded(
+                                        child: Text(
+                                          tagihan.nomorInvoice ?? tagihan.id,
+                                          style: Theme.of(context).textTheme.titleSmall,
+                                        ),
+                                      ),
+                                      StatusBadge(status: tagihan.status),
+                                    ],
+                                  ),
+                                  Text(
+                                    tagihan.periode ?? '-',
+                                    style: Theme.of(context).textTheme.bodySmall,
+                                  ),
+                                  const SizedBox(height: 12),
+                                  Row(
+                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Text(
+                                        formatRupiah(tagihan.total),
+                                        style: Theme.of(context)
+                                            .textTheme
+                                            .titleMedium
+                                            ?.copyWith(fontWeight: FontWeight.bold),
+                                      ),
+                                      FilledButton.icon(
+                                        style: FilledButton.styleFrom(
+                                          backgroundColor: AppColors.primaryOlive,
+                                        ),
+                                        onPressed: () => Navigator.of(context).push(
+                                          MaterialPageRoute(
+                                            builder: (_) => TagihanDetailScreen(id: tagihan.id),
                                           ),
                                         ),
-                                        StatusBadge(status: tagihan.status),
-                                      ],
-                                    ),
-                                    Text(
-                                      tagihan.periode ?? '-',
-                                      style: Theme.of(context).textTheme.bodySmall,
-                                    ),
-                                    const SizedBox(height: 12),
-                                    Row(
-                                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Text(
-                                          formatRupiah(tagihan.total),
-                                          style: Theme.of(context)
-                                              .textTheme
-                                              .titleMedium
-                                              ?.copyWith(fontWeight: FontWeight.bold),
-                                        ),
-                                        FilledButton.icon(
-                                          style: FilledButton.styleFrom(
-                                            backgroundColor: AppColors.primaryOlive,
-                                          ),
-                                          onPressed: () => Navigator.of(context).push(
-                                            MaterialPageRoute(
-                                              builder: (_) => TagihanDetailScreen(id: tagihan.id),
-                                            ),
-                                          ),
-                                          icon: const Icon(Icons.print_outlined, size: 18),
-                                          label: const Text('Print'),
-                                        ),
-                                      ],
-                                    ),
-                                  ],
-                                ),
+                                        icon: const Icon(Icons.print_outlined, size: 18),
+                                        label: const Text('Print'),
+                                      ),
+                                    ],
+                                  ),
+                                ],
                               ),
-                            );
-                          },
-                        );
-                      },
-                    ),
-                  ),
+                            ),
+                          ),
+                        ),
+                      ),
+                    ],
+                  );
+                },
+              ),
+          ],
+        ),
+      ),
+    );
+  }
+}
+
+/// Tab berbentuk kartu ikon (Invoice/Electricity) — persis desain resmi:
+/// terpilih = border olive + ikon bg penuh; tidak terpilih = kartu polos.
+class _TabTile extends StatelessWidget {
+  const _TabTile({
+    required this.icon,
+    required this.iconBg,
+    required this.label,
+    required this.selected,
+    required this.onTap,
+  });
+
+  final IconData icon;
+  final Color iconBg;
+  final String label;
+  final bool selected;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.symmetric(vertical: 16),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: selected ? AppColors.primaryOlive : Colors.grey.shade200,
+            width: selected ? 2 : 1,
           ),
-        ],
+        ),
+        child: Column(
+          children: [
+            CircleAvatar(radius: 20, backgroundColor: iconBg, child: Icon(icon, color: Colors.white)),
+            const SizedBox(height: 8),
+            Text(
+              label,
+              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5),
+            ),
+          ],
+        ),
       ),
     );
   }

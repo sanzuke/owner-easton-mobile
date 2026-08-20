@@ -5,17 +5,25 @@ import '../application/tiket_providers.dart';
 import 'tiket_detail_screen.dart';
 import 'tiket_create_screen.dart';
 
-/// Daftar tiket (semua tipe) + tombol ajukan tiket baru — Tier 1
-/// (lihat docs/96 §4).
+/// Daftar tiket + tombol ajukan tiket baru — Tier 1 (lihat docs/96 §4).
+/// Dipanggil dari grid kategori [RequestScreen] dengan [filterTipe] untuk
+/// menampilkan tiket 1 tipe saja (persis alur desain resmi); tanpa filter,
+/// menampilkan semua tiket.
 class TiketListScreen extends ConsumerWidget {
-  const TiketListScreen({super.key});
+  const TiketListScreen({super.key, this.filterTipe, this.filterLabel});
+
+  final String? filterTipe;
+  final String? filterLabel;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final listAsync = ref.watch(tiketListProvider);
+    final filtered = listAsync.whenData(
+      (list) => filterTipe == null ? list : list.where((t) => t.tipe == filterTipe).toList(),
+    );
 
     return Scaffold(
-      appBar: AppBar(title: const Text('Tiket')),
+      appBar: AppBar(title: Text(filterLabel ?? 'Tiket')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final created = await Navigator.of(context).push<bool>(
@@ -30,7 +38,7 @@ class TiketListScreen extends ConsumerWidget {
       ),
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(tiketListProvider),
-        child: listAsync.when(
+        child: filtered.when(
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => Center(child: Text('Gagal memuat tiket: $err')),
           data: (list) {
