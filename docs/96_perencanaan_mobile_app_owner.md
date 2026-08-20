@@ -1,6 +1,7 @@
 # Perencanaan Mobile App Owner — BMS Easton Park
 
-**Status:** F1 (API Backend Tier 1) MULAI DIKERJAKAN 19 Agustus 2026 — Auth (OTP+Sanctum) + Dashboard sudah jalan & diverifikasi HTTP asli. Lihat update di bagian bawah dokumen.
+**Status:** F1 (API Backend Tier 1) SELESAI 19 Agustus 2026 (Auth OTP+Sanctum, Dashboard, Tagihan, Riwayat Bayar, Profil, Tiket — semua diverifikasi HTTP asli). F2 (Flutter App Tier 1) MULAI DIKERJAKAN 21 Agustus 2026 — project di-scaffold, layout disesuaikan persis dengan desain resmi, dan berhasil dijalankan di device Android fisik. Lihat update di bagian bawah dokumen.
+**Repo mobile app:** [`github.com/sanzuke/owner-easton-mobile`](https://github.com/sanzuke/owner-easton-mobile) (branch `main`).
 **Cakupan disepakati user (8 Agustus 2026):** full parity fitur dengan `ownerdev`, backend API baru di Laravel, platform Flutter (cross-platform Android+iOS).
 **API Reference untuk tim mobile:** lihat [`docs/96b_api_reference_mobile_owner.md`](96b_api_reference_mobile_owner.md) — kontrak endpoint lengkap (request/response/error) supaya development Flutter bisa jalan paralel tanpa baca source Laravel.
 
@@ -266,3 +267,71 @@ exception handler). Semua file & data uji dibersihkan.
 Tiket (ajukan lintas-tipe +lampiran). **Sisa dari rencana awal:** push notif FCM (butuh Firebase project
 baru, di luar scope backend saja), bayar-langsung (nunggu gateway BJB), deploy ke server (tetap
 di-HOLD, belum ada SPK).
+
+---
+
+## Update 21 Agustus 2026 — F2 Flutter App: initial scaffold + layout persis desain resmi
+
+**Project Flutter dibuat dari nol** di repo terpisah [`sanzuke/owner-easton-mobile`](https://github.com/sanzuke/owner-easton-mobile)
+(bukan di monorepo ini) — `flutter create` Android+iOS, struktur `lib/core` (theme, network client
+Dio + response envelope, secure token storage utk Sanctum, biometric quick-unlock service) dan
+`lib/features/<nama>/{data,application,presentation}` per fitur (Riverpod utk state management,
+go_router utk navigasi). Konsumsi API mengikuti kontrak di §3 & endpoint yang sudah jadi di F1.
+
+**Desain resmi (Claude Artifact, link dibagikan user) diterapkan persis setelah akses diberikan** —
+awalnya sempat coba akses tapi artifact butuh login, user login-kan lalu diverifikasi via browser
+otomatis (prototipe interaktif: login → dashboard → tagihan → acara → menu lainnya → request).
+Palet warna (olive/gold brand, navy CTA sekunder, pink utk ikon Request, biru utk Utility, badge
+hijau/merah muda utk status Payment/Invoice), struktur navigasi 4-tab (Beranda/Tagihan/Acara/Lainnya
+— BUKAN 5 tab sesuai asumsi awal; Tiket & Profil ternyata masuk grid menu "Lainnya", bukan tab
+sendiri), dan gaya kartu/badge semua disesuaikan ulang setelah user feedback "layout belum sesuai
+dengan design artifact nya, mohon di sesuaikan persis sama":
+- **Login:** badge ikon olive + logo Easton Park asli (`assets/Easton-logo.png`, dikirim user),
+  kartu putih (Selamat Datang → form Nomor WhatsApp + ID BAST/Unit → tombol Masuk → footer "Butuh
+  bantuan?" dgn kontak WA/telepon/website).
+- **Dashboard:** banner sambutan olive full-width (pengganti app bar), kartu pengumuman acara
+  terdekat (bg biru-ungu + tombol "Konfirmasi Kehadiran" navy, otomatis sembunyi kalau tak ada
+  acara yang butuh konfirmasi), kartu tagihan & pemakaian air dgn link, kartu info unit.
+- **Tagihan:** tab Invoice/Electricity jadi kartu ikon (bukan segmented button generik) + kartu
+  "Tagihan Terakhir" di atas daftar.
+- **Request (menu Tiket):** dipecah jadi grid kategori dinamis (dari `GET /tiket/tipe`) dgn jumlah
+  permintaan per kategori — persis desain — yang mengarah ke daftar tiket terfilter per tipe.
+- **Fitur baru "Acara"** (list + konfirmasi kehadiran) dan **"Notifikasi"** (bell icon konsisten di
+  semua app bar sub-layar) ditambahkan krn muncul jelas di desain — **endpoint backend
+  `/api/v1/acara` dan `/api/v1/notifikasi` BELUM ADA**, jadi kedua fitur ini tampil kosong/gagal-fetch
+  di app sampai backend menyusul. Sudah didokumentasikan jelas di komentar kode repository masing-masing.
+- **App icon:** digenerate dari ikon daun pada logo resmi (dipotong & dipusatkan pakai
+  `flutter_launcher_icons`) — adaptive icon Android (foreground transparan + bg krem `#EDE9E0`) +
+  icon iOS (alpha channel dihapus, App Store-compliant).
+
+**Diverifikasi jalan di device Android fisik** (Realme RMX3521, USB debugging) — bukan emulator.
+`flutter analyze` bersih di setiap iterasi.
+
+**Isu environment lokal yang ditemukan & difix (bukan bug kode project, dicatat krn kemungkinan
+kena lagi kalau setup ulang mesin dev):**
+1. **Avast Antivirus SSL/TLS scanning** — root cert Avast dipercaya Windows tapi tidak dipercaya
+   Java (JBR bundel Android Studio bahkan tidak punya provider `Windows-ROOT`/`sunmscapi.dll` sama
+   sekali). Fix: export root cert Avast dari Windows cert store (`Cert:\LocalMachine\Root`), import
+   ke `cacerts` JDK yang dipakai (`keytool -importcert`). Tanpa fix ini, SEMUA download Gradle/Maven
+   gagal SSL handshake.
+2. **Disk C: berulang kali nyaris/benar-benar penuh** selama build (Android NDK ~2.2GB, Gradle
+   caches bengkak ke 9.5GB, ditambah 3.22GB cache installer Visual Studio yang nyangkut di Temp dari
+   sesi lama, dan Chrome cache ~5GB) — flutter run gagal dgn "not enough space on the disk". Fix:
+   hapus versi NDK yang tidak dipakai project (`flutter.ndkVersion` di `android/app/build.gradle.kts`
+   pin ke 1 versi spesifik), hapus cache installer VS lama, hapus Chrome Cache folder, hapus gradle
+   wrapper dist versi lama yang tidak dipakai (project pin ke 8.14-all).
+3. **2 file dependency besar (`intellij-core-31.11.1.jar`, `kotlin-compiler-31.11.1.jar`, ~88MB
+   gabungan) gagal didownload lewat Gradle/Java berkali-kali** (`Read timed out`, bukan soal SSL —
+   tetap lambat/gagal meski sudah lewat Avast) — di-download manual via `curl` (jalan normal, <10
+   detik) lalu ditaruh manual ke cache Gradle module (`~/.gradle/caches/modules-2/files-2.1/<group>/
+   <artifact>/<version>/<sha1-konten-file>/<file>.jar`) supaya Gradle skip network sama sekali utk
+   2 file itu.
+4. `flutter config --jdk-dir` diset ke JBR Android Studio (`C:\Program Files\Android\Android
+   Studio\jbr`, Java 21) — JDK lain yang tersedia di mesin ini (Adoptium JDK 25) TIDAK kompatibel
+   dgn Gradle 8.14/AGP (crash "What went wrong: 25" saat start daemon), dan Java 8 lama punya
+   cacerts basi/tidak update.
+
+**Belum:** endpoint backend Acara & Notifikasi (lihat di atas), setup Firebase project (push
+notif FCM), fitur Tier 2 (bayar langsung, upload KTP/KK dari UI — repository sudah siap tinggal
+pasang picker file), grid Request belum pixel-perfect (desain pakai 5 kategori fix dgn ikon
+berbeda per kategori, implementasi sekarang pakai 1 ikon generik utk semua kategori dinamis).
