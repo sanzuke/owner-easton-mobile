@@ -11,10 +11,24 @@ Initial scaffold — struktur project, tema, networking layer, dan layar Tier 1
 (lihat docs/96 §4) sudah dibuat mengikuti kontrak API yang sudah jadi & terverifikasi
 di backend (Auth OTP, Dashboard, Tagihan, Riwayat Bayar, Profil, Tiket).
 
-**Desain visual (Figma/Claude Artifact) belum diterapkan** — link desain yang dibagikan
-butuh login untuk diakses, jadi tema saat ini pakai Material 3 generik
-(`lib/core/theme/app_theme.dart`) sebagai placeholder. Ganti `seedColor` di sana begitu
-desain resmi bisa diakses.
+**Desain visual diterapkan** (21 Agustus 2026, setelah akses ke
+[Claude Artifact desain](https://claude.ai/code/artifact/1b3217fc-0637-4364-b51e-0b33c66be321)
+diberikan) — palet warna, struktur navigasi, dan gaya kartu/badge mengikuti prototipe
+resmi. Lihat `lib/core/theme/app_colors.dart` untuk catatan sumber warna (estimasi visual
+dari screenshot, bukan token resmi — update lagi kalau ada file token Figma).
+
+Struktur navigasi mengikuti desain: bottom nav **4 tab** — Beranda, Tagihan, Acara,
+Lainnya. Tiket ("Request") dan Profil diakses dari dalam tab **Lainnya**; Riwayat
+Pembayaran diakses dari ikon jam di AppBar tab **Tagihan** (desain tidak punya tab
+terpisah untuk keduanya).
+
+**Belum sepenuhnya pixel-match:** layar "Request" di desain menampilkan grid 5 kategori
+tiket dengan jumlah permintaan per kategori; scaffold ini masih pakai daftar tiket flat
++ tombol "Ajukan Tiket" (fungsional, beda tata letak). Utility/PBB/P3SRS/Pengaturan di
+tab Lainnya masih placeholder "segera hadir" karena API-nya belum ada di backend (lihat
+docs/96 §5) — begitu juga fitur **Acara** (`lib/features/acara/`), yang endpoint-nya
+(`/api/v1/acara`) belum dibangun sama sekali, jadi tab ini akan gagal fetch sampai
+backend menyusul.
 
 ## Stack
 
