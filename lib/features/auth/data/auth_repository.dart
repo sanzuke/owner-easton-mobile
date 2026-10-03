@@ -58,6 +58,7 @@ class AuthRepository {
       await _api.post('/auth/logout');
     } finally {
       await _tokenStorage.clearToken();
+      await _tokenStorage.setBiometricEnabled(false);
     }
   }
 }

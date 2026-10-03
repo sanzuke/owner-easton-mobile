@@ -7,6 +7,7 @@ import '../../../core/widgets/coming_soon_screen.dart';
 import '../../../core/widgets/menu_icon_card.dart';
 import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../auth/presentation/biometric_toggle_tile.dart';
 import '../../profil/presentation/profil_screen.dart';
 import '../../tiket/presentation/request_screen.dart';
 
@@ -114,6 +115,8 @@ class LainnyaScreen extends ConsumerWidget {
               ),
             ],
           ),
+          const SizedBox(height: 12),
+          const BiometricToggleTile(),
         ],
       ),
     );

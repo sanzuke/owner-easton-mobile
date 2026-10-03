@@ -19,4 +19,13 @@ class SecureTokenStorage {
 
   Future<void> clearToken() =>
       _storage.delete(key: AppConstants.secureStorageTokenKey);
+
+  /// Preferensi buka cepat biometrik. Disimpan di secure storage yang sama
+  /// dengan token supaya hilang bersama-sama saat logout.
+  Future<bool> isBiometricEnabled() async =>
+      await _storage.read(key: AppConstants.prefsBiometricEnabledKey) == 'true';
+
+  Future<void> setBiometricEnabled(bool enabled) => enabled
+      ? _storage.write(key: AppConstants.prefsBiometricEnabledKey, value: 'true')
+      : _storage.delete(key: AppConstants.prefsBiometricEnabledKey);
 }

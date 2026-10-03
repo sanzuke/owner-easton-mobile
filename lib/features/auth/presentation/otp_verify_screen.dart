@@ -4,6 +4,8 @@ import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_envelope.dart';
 import '../application/auth_providers.dart';
+import '../../../core/providers/core_providers.dart';
+import '../application/biometric_providers.dart';
 
 /// Verifikasi kode OTP 4 digit yang dikirim via WhatsApp — lihat docs/96
 /// update 19 Agustus (`POST /auth/verify-otp`, rate-limit 10x/menit).
@@ -42,11 +44,41 @@ class _OtpVerifyScreenState extends ConsumerState<OtpVerifyScreen> {
       await ref.read(authRepositoryProvider).verifyOtp(uid: widget.uid, otp: otp);
       ref.invalidate(authStateProvider);
       if (!mounted) return;
+      await _tawarkanBiometrik();
+      if (!mounted) return;
       context.go('/dashboard');
     } on ApiException catch (e) {
       setState(() => _errorMessage = e.message);
     } finally {
       if (mounted) setState(() => _submitting = false);
+    }
+  }
+
+  /// Tawarkan buka cepat biometrik sekali, setelah login OTP pertama —
+  /// hanya bila perangkat punya biometrik terdaftar dan belum aktif.
+  Future<void> _tawarkanBiometrik() async {
+    final service = ref.read(biometricServiceProvider);
+    final storage = ref.read(secureTokenStorageProvider);
+    if (!await service.isAvailable() || await storage.isBiometricEnabled()) return;
+    if (!mounted) return;
+
+    final mau = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Aktifkan buka cepat?'),
+        content: const Text(
+          'Buka aplikasi berikutnya cukup dengan sidik jari atau wajah, tanpa kode OTP. '
+          'Data biometrik tidak dikirim ke server.',
+        ),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx, false), child: const Text('Nanti')),
+          TextButton(onPressed: () => Navigator.pop(ctx, true), child: const Text('Aktifkan')),
+        ],
+      ),
+    );
+    if (mau != true) return;
+    if (await service.authenticate(reason: 'Verifikasi untuk mengaktifkan buka cepat')) {
+      await storage.setBiometricEnabled(true);
     }
   }
 

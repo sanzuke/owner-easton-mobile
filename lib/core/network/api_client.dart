@@ -61,6 +61,13 @@ class ApiClient {
   }) =>
       _request(() => _dio.put(path, data: data), fromData);
 
+  Future<ApiEnvelope<T>> delete<T>(
+    String path, {
+    Object? data,
+    T Function(dynamic json)? fromData,
+  }) =>
+      _request(() => _dio.delete(path, data: data), fromData);
+
   /// Upload multipart (KTP/KK/foto profil/lampiran tiket) — lihat docs/96,
   /// endpoint `POST /profil/berkas` dan `POST /tiket/{id}/berkas`.
   Future<ApiEnvelope<T>> uploadMultipart<T>(
