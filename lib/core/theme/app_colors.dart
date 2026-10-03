@@ -1,24 +1,24 @@
 import 'package:flutter/material.dart';
 
-/// Palet warna. Revisi 3 Okt 2026: nada dibuat lebih tenang (sage/olive
-/// teredam + netral hangat) menggantikan olive-kuning yang terlalu mencolok
-/// dari estimasi screenshot prototipe awal. Skema light/dark lengkap ada di
+/// Palet warna. Revisi 4 Okt 2026: disamakan dengan portal web owner
+/// (owner.eprjatinangor.com) — emas-mustard sebagai warna brand, latar
+/// hampir putih, netral abu dingin. Skema light/dark lengkap ada di
 /// `app_theme.dart`; konstanta di sini dipakai widget yang butuh warna brand
 /// tetap (ikon, badge).
 class AppColors {
   AppColors._();
 
-  /// Warna brand utama (sage-olive teredam) — aksen, ikon brand, tombol.
-  static const Color primaryOlive = Color(0xFF5F7340);
+  /// Warna brand utama (emas-mustard, sama dengan portal web).
+  static const Color brandGold = Color(0xFFB3A22C);
 
-  /// Latar utama mode terang (netral hangat, bukan krem pekat).
-  static const Color background = Color(0xFFF7F6F2);
+  /// Latar utama mode terang (hampir putih, seperti portal web).
+  static const Color background = Color(0xFFF8F9FA);
 
   /// Aksen sekunder (slate) untuk CTA kontras.
-  static const Color navyAccent = Color(0xFF39455C);
+  static const Color navyAccent = Color(0xFF374151);
 
-  /// Aksen hangat untuk ikon penekanan (dulu kuning menyala 0xFFE0B400).
-  static const Color goldAccent = Color(0xFFC49A3A);
+  /// Aksen hangat untuk ikon penekanan.
+  static const Color goldAccent = Color(0xFFC9A93A);
 
   /// Ikon & badge kategori "Request"/tiket.
   static const Color pinkAccent = Color(0xFFD4587C);

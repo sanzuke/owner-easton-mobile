@@ -82,10 +82,10 @@ class NotifikasiScreen extends ConsumerWidget {
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
-                        color: AppColors.primaryOlive.withValues(alpha: 0.12),
+                        color: AppColors.brandGold.withValues(alpha: 0.12),
                         borderRadius: BorderRadius.circular(10),
                       ),
-                      child: const Icon(Icons.notifications_outlined, color: AppColors.primaryOlive),
+                      child: const Icon(Icons.notifications_outlined, color: AppColors.brandGold),
                     ),
                     title: Text(
                       n.judul,
@@ -104,7 +104,7 @@ class NotifikasiScreen extends ConsumerWidget {
                     ),
                     trailing: n.sudahDibaca
                         ? null
-                        : const Icon(Icons.circle, size: 10, color: AppColors.primaryOlive),
+                        : const Icon(Icons.circle, size: 10, color: AppColors.brandGold),
                     isThreeLine: n.pesan.isNotEmpty,
                   ),
                 );

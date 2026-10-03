@@ -158,7 +158,7 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                       ),
                                       FilledButton.icon(
                                         style: FilledButton.styleFrom(
-                                          backgroundColor: AppColors.primaryOlive,
+                                          backgroundColor: AppColors.brandGold,
                                         ),
                                         onPressed: () => Navigator.of(context).push(
                                           MaterialPageRoute(
@@ -215,7 +215,7 @@ class _TabTile extends StatelessWidget {
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppColors.primaryOlive : Theme.of(context).colorScheme.outlineVariant,
+            color: selected ? AppColors.brandGold : Theme.of(context).colorScheme.outlineVariant,
             width: selected ? 2 : 1,
           ),
         ),

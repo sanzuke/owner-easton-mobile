@@ -11,50 +11,50 @@ class AppTheme {
 
   static const _lightScheme = ColorScheme(
     brightness: Brightness.light,
-    primary: AppColors.primaryOlive,
+    primary: AppColors.brandGold,
     onPrimary: Colors.white,
-    primaryContainer: Color(0xFFE4EAD6),
-    onPrimaryContainer: Color(0xFF1D2810),
+    primaryContainer: Color(0xFFF1ECD6),
+    onPrimaryContainer: Color(0xFF5E5410),
     secondary: AppColors.navyAccent,
     onSecondary: Colors.white,
-    secondaryContainer: Color(0xFFE3E6EE),
-    onSecondaryContainer: Color(0xFF1B2232),
+    secondaryContainer: Color(0xFFE5E7EB),
+    onSecondaryContainer: Color(0xFF1F2937),
     error: AppColors.destructive,
     onError: Colors.white,
     surface: Colors.white,
-    onSurface: Color(0xFF1D1D18),
-    onSurfaceVariant: Color(0xFF6A6A60),
+    onSurface: Color(0xFF111827),
+    onSurfaceVariant: Color(0xFF6B7280),
     surfaceContainerLowest: Colors.white,
-    surfaceContainerLow: Color(0xFFF7F6F2),
-    surfaceContainer: Color(0xFFF1F0EA),
-    surfaceContainerHigh: Color(0xFFEBEAE3),
-    surfaceContainerHighest: Color(0xFFE5E4DC),
-    outline: Color(0xFFB9B8AE),
-    outlineVariant: Color(0xFFE8E6DE),
+    surfaceContainerLow: Color(0xFFF9FAFB),
+    surfaceContainer: Color(0xFFF3F4F6),
+    surfaceContainerHigh: Color(0xFFE5E7EB),
+    surfaceContainerHighest: Color(0xFFD1D5DB),
+    outline: Color(0xFF9CA3AF),
+    outlineVariant: Color(0xFFE5E7EB),
   );
 
   static const _darkScheme = ColorScheme(
     brightness: Brightness.dark,
-    primary: Color(0xFFB4C58A),
-    onPrimary: Color(0xFF1F2B0E),
-    primaryContainer: Color(0xFF38472A),
-    onPrimaryContainer: Color(0xFFD6E6AB),
+    primary: Color(0xFFD9CB5E),
+    onPrimary: Color(0xFF2F2A05),
+    primaryContainer: Color(0xFF4A430F),
+    onPrimaryContainer: Color(0xFFF1E9A8),
     secondary: Color(0xFFB7C1D9),
     onSecondary: Color(0xFF1F2A40),
     secondaryContainer: Color(0xFF353F55),
     onSecondaryContainer: Color(0xFFDCE2F3),
     error: Color(0xFFFF8A80),
     onError: Color(0xFF410002),
-    surface: Color(0xFF1A1B17),
-    onSurface: Color(0xFFE7E6DD),
-    onSurfaceVariant: Color(0xFFA9A99D),
-    surfaceContainerLowest: Color(0xFF0F100D),
-    surfaceContainerLow: Color(0xFF141510),
-    surfaceContainer: Color(0xFF1F201B),
-    surfaceContainerHigh: Color(0xFF292A24),
-    surfaceContainerHighest: Color(0xFF33342D),
-    outline: Color(0xFF6F7066),
-    outlineVariant: Color(0xFF2E2F28),
+    surface: Color(0xFF1A1C20),
+    onSurface: Color(0xFFE5E7EB),
+    onSurfaceVariant: Color(0xFF9CA3AF),
+    surfaceContainerLowest: Color(0xFF0F1114),
+    surfaceContainerLow: Color(0xFF14161A),
+    surfaceContainer: Color(0xFF22252A),
+    surfaceContainerHigh: Color(0xFF2C2F35),
+    surfaceContainerHighest: Color(0xFF383B42),
+    outline: Color(0xFF6B7280),
+    outlineVariant: Color(0xFF2E3138),
   );
 
   static ThemeData light() => _build(_lightScheme, AppColors.background);
@@ -62,17 +62,22 @@ class AppTheme {
   static ThemeData dark() => _build(_darkScheme, const Color(0xFF11120F));
 
   static ThemeData _build(ColorScheme cs, Color scaffold) {
-    final isDark = cs.brightness == Brightness.dark;
     final base = ThemeData(brightness: cs.brightness, useMaterial3: true);
     final textTheme = base.textTheme
         .apply(bodyColor: cs.onSurface, displayColor: cs.onSurface)
         .copyWith(
-          titleLarge: base.textTheme.titleLarge?.copyWith(fontWeight: FontWeight.w700, letterSpacing: -0.3),
-          titleMedium: base.textTheme.titleMedium?.copyWith(fontWeight: FontWeight.w600),
+          titleLarge: base.textTheme.titleLarge?.copyWith(
+            fontWeight: FontWeight.w700,
+            letterSpacing: -0.3,
+          ),
+          titleMedium: base.textTheme.titleMedium?.copyWith(
+            fontWeight: FontWeight.w600,
+          ),
         );
 
-    OutlineInputBorder border(Color color, [double width = 1]) => OutlineInputBorder(
-          borderRadius: BorderRadius.circular(14),
+    OutlineInputBorder border(Color color, [double width = 1]) =>
+        OutlineInputBorder(
+          borderRadius: BorderRadius.circular(12),
           borderSide: BorderSide(color: color, width: width),
         );
 
@@ -103,7 +108,9 @@ class AppTheme {
         elevation: 0,
         height: 68,
         indicatorColor: cs.primaryContainer,
-        indicatorShape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+        indicatorShape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(16),
+        ),
         labelTextStyle: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
           return TextStyle(
@@ -114,13 +121,18 @@ class AppTheme {
         }),
         iconTheme: WidgetStateProperty.resolveWith((states) {
           final selected = states.contains(WidgetState.selected);
-          return IconThemeData(color: selected ? cs.onPrimaryContainer : cs.onSurfaceVariant);
+          return IconThemeData(
+            color: selected ? cs.onPrimaryContainer : cs.onSurfaceVariant,
+          );
         }),
       ),
       inputDecorationTheme: InputDecorationTheme(
         filled: true,
-        fillColor: isDark ? cs.surfaceContainer : cs.surfaceContainerLow,
-        contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+        fillColor: cs.surfaceContainer,
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 16,
+        ),
         hintStyle: TextStyle(color: cs.onSurfaceVariant.withValues(alpha: 0.8)),
         border: border(cs.outlineVariant),
         enabledBorder: border(cs.outlineVariant),
@@ -131,7 +143,9 @@ class AppTheme {
       filledButtonTheme: FilledButtonThemeData(
         style: FilledButton.styleFrom(
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
@@ -141,7 +155,9 @@ class AppTheme {
           foregroundColor: cs.onPrimary,
           elevation: 0,
           minimumSize: const Size.fromHeight(52),
-          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(16),
+          ),
           textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
         ),
       ),
@@ -158,7 +174,11 @@ class AppTheme {
           side: BorderSide(color: cs.outlineVariant),
         ),
       ),
-      dividerTheme: DividerThemeData(color: cs.outlineVariant, space: 1, thickness: 1),
+      dividerTheme: DividerThemeData(
+        color: cs.outlineVariant,
+        space: 1,
+        thickness: 1,
+      ),
       snackBarTheme: SnackBarThemeData(
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),

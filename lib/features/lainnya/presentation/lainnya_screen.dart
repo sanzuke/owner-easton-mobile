@@ -81,7 +81,7 @@ class LainnyaScreen extends ConsumerWidget {
               ),
               MenuIconCard(
                 icon: Icons.description_outlined,
-                iconColor: AppColors.primaryOlive,
+                iconColor: AppColors.brandGold,
                 title: 'PBB',
                 subtitle: 'Pajak bumi bangunan',
                 onTap: () => Navigator.of(context).push(

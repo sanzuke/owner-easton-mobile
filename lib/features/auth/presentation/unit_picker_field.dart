@@ -72,6 +72,7 @@ class _UnitPickerFieldState extends ConsumerState<UnitPickerField> {
           onChanged: _onChanged,
           decoration: InputDecoration(
             hintText: 'Cari atau pilih unit...',
+            prefixIcon: const Icon(Icons.apartment_rounded, size: 20),
             suffixIcon: const Icon(Icons.expand_more),
             errorText: widget.errorText,
           ),
@@ -107,7 +108,11 @@ class _UnitResultsPanel extends ConsumerWidget {
         loading: () => const Padding(
           padding: EdgeInsets.all(16),
           child: Center(
-            child: SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+            child: SizedBox(
+              height: 18,
+              width: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
           ),
         ),
         error: (err, _) => Padding(
@@ -121,7 +126,10 @@ class _UnitResultsPanel extends ConsumerWidget {
           if (units.isEmpty) {
             return const Padding(
               padding: EdgeInsets.all(12),
-              child: Text('Unit tidak ditemukan.', style: TextStyle(fontSize: 12)),
+              child: Text(
+                'Unit tidak ditemukan.',
+                style: TextStyle(fontSize: 12),
+              ),
             );
           }
           return ListView.separated(

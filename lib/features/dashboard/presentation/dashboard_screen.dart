@@ -125,15 +125,15 @@ class DashboardScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryOlive.withValues(alpha: 0.08),
+                          color: AppColors.brandGold.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(16),
                           border:
-                              Border.all(color: AppColors.primaryOlive.withValues(alpha: 0.3)),
+                              Border.all(color: AppColors.brandGold.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.home_work_outlined, color: AppColors.primaryOlive),
+                            const Icon(Icons.home_work_outlined, color: AppColors.brandGold),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -306,9 +306,9 @@ class _InfoCard extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(linkLabel, style: const TextStyle(color: AppColors.primaryOlive)),
+                        Text(linkLabel, style: const TextStyle(color: AppColors.brandGold)),
                         const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward, size: 14, color: AppColors.primaryOlive),
+                        const Icon(Icons.arrow_forward, size: 14, color: AppColors.brandGold),
                       ],
                     ),
                   ],
