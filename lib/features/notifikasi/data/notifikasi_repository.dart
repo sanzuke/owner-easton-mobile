@@ -73,7 +73,7 @@ class NotifikasiRepository {
       _api.post<void>('/device-token', data: {
         'token': token,
         'platform': platform,
-        if (appVersion != null) 'app_version': appVersion,
+        'app_version': ?appVersion,
       });
 
   Future<void> lepasPerangkat(String token) =>
