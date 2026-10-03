@@ -2,15 +2,14 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/network/api_envelope.dart';
-import '../../../core/theme/app_colors.dart';
 import '../application/auth_providers.dart';
 import '../data/unit_repository.dart';
 import 'otp_verify_screen.dart';
 import 'unit_picker_field.dart';
 
 /// Layar login — No HP + ID BAST → kirim OTP WhatsApp (lihat docs/96 §2, §3).
-/// Layout mengikuti desain resmi persis: badge ikon + judul brand di atas,
-/// lalu kartu putih berisi form + footer bantuan.
+/// Gaya: latar polos, logo dalam wadah lembut, judul rata kiri, tanpa kartu
+/// berbayang; seluruh warna dari ColorScheme (aman di mode terang & gelap).
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -61,158 +60,120 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+
     return Scaffold(
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
-            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
-            child: Form(
-              key: _formKey,
-              child: Column(
-                mainAxisSize: MainAxisSize.min,
-                children: [
-                  // Badge ikon bulat-persegi olive + logo — sesuai desain resmi.
-                  Container(
-                    width: 72,
-                    height: 72,
-                    padding: const EdgeInsets.all(12),
-                    decoration: BoxDecoration(
-                      color: AppColors.primaryOlive,
-                      borderRadius: BorderRadius.circular(20),
+            padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 32),
+            child: ConstrainedBox(
+              constraints: const BoxConstraints(maxWidth: 440),
+              child: Form(
+                key: _formKey,
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Container(
+                      width: 64,
+                      height: 64,
+                      padding: const EdgeInsets.all(14),
+                      decoration: BoxDecoration(
+                        color: cs.primaryContainer,
+                        borderRadius: BorderRadius.circular(20),
+                      ),
+                      child: Image.asset('assets/app_icon_foreground.png', color: cs.primary),
                     ),
-                    child: Image.asset(
-                      'assets/app_icon_foreground.png',
-                      color: Colors.white,
+                    const SizedBox(height: 28),
+                    Text('Selamat datang', style: theme.textTheme.headlineMedium?.copyWith(
+                      fontWeight: FontWeight.w800,
+                      letterSpacing: -0.6,
+                    )),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Masuk ke portal owner Easton Park Residence.',
+                      style: theme.textTheme.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                     ),
-                  ),
-                  const SizedBox(height: 16),
-                  Text(
-                    'Easton Park Residence',
-                    style: Theme.of(context)
-                        .textTheme
-                        .titleLarge
-                        ?.copyWith(fontWeight: FontWeight.bold),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    'Building Management System',
-                    style: Theme.of(context)
-                        .textTheme
-                        .bodySmall
-                        ?.copyWith(color: Colors.grey.shade600),
-                    textAlign: TextAlign.center,
-                  ),
-                  const SizedBox(height: 24),
-                  // Kartu putih — form login + footer bantuan.
-                  Container(
-                    width: double.infinity,
-                    padding: const EdgeInsets.all(24),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.05),
-                          blurRadius: 16,
-                          offset: const Offset(0, 4),
+                    const SizedBox(height: 32),
+                    _FieldLabel('Nomor WhatsApp'),
+                    const SizedBox(height: 8),
+                    TextFormField(
+                      controller: _hpController,
+                      keyboardType: TextInputType.phone,
+                      decoration: const InputDecoration(
+                        hintText: '08123456789',
+                        prefixIcon: Icon(Icons.phone_iphone_rounded, size: 20),
+                      ),
+                      validator: (v) => (v == null || v.trim().isEmpty)
+                          ? 'Nomor WhatsApp wajib diisi'
+                          : null,
+                    ),
+                    const SizedBox(height: 6),
+                    Text(
+                      'Kode OTP dikirim ke nomor WhatsApp yang terdaftar.',
+                      style: theme.textTheme.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                    ),
+                    const SizedBox(height: 20),
+                    _FieldLabel('Unit'),
+                    const SizedBox(height: 8),
+                    UnitPickerField(
+                      errorText: _unitErrorText,
+                      onSelected: (unit) => setState(() {
+                        _selectedUnit = unit;
+                        _unitErrorText = null;
+                      }),
+                    ),
+                    if (_errorMessage != null) ...[
+                      const SizedBox(height: 16),
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: cs.error.withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(12),
                         ),
-                      ],
+                        child: Row(
+                          children: [
+                            Icon(Icons.error_outline_rounded, size: 18, color: cs.error),
+                            const SizedBox(width: 8),
+                            Expanded(
+                              child: Text(_errorMessage!, style: TextStyle(color: cs.error)),
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                    const SizedBox(height: 28),
+                    ElevatedButton(
+                      onPressed: _submitting ? null : _submit,
+                      child: _submitting
+                          ? SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(strokeWidth: 2, color: cs.onPrimary),
+                            )
+                          : const Text('Kirim kode OTP'),
                     ),
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.stretch,
+                    const SizedBox(height: 36),
+                    Center(
+                      child: Text(
+                        'Butuh bantuan?',
+                        style: theme.textTheme.labelLarge?.copyWith(color: cs.onSurfaceVariant),
+                      ),
+                    ),
+                    const SizedBox(height: 12),
+                    const Wrap(
+                      alignment: WrapAlignment.center,
+                      spacing: 8,
+                      runSpacing: 8,
                       children: [
-                        Text(
-                          'Selamat Datang',
-                          style: Theme.of(context)
-                              .textTheme
-                              .titleMedium
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 2),
-                        Text(
-                          'Masuk ke portal owner Anda',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.grey.shade600),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 20),
-                        _FieldLabel('Nomor WhatsApp'),
-                        const SizedBox(height: 6),
-                        TextFormField(
-                          controller: _hpController,
-                          keyboardType: TextInputType.phone,
-                          decoration: const InputDecoration(
-                            hintText: 'Contoh: 08123456789',
-                          ),
-                          validator: (v) => (v == null || v.trim().isEmpty)
-                              ? 'Nomor WhatsApp wajib diisi'
-                              : null,
-                        ),
-                        const SizedBox(height: 4),
-                        Text(
-                          'Masukkan nomor WhatsApp yang terdaftar',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(color: Colors.grey.shade500, fontSize: 11),
-                        ),
-                        const SizedBox(height: 16),
-                        _FieldLabel('Pilih Unit'),
-                        const SizedBox(height: 6),
-                        UnitPickerField(
-                          errorText: _unitErrorText,
-                          onSelected: (unit) => setState(() {
-                            _selectedUnit = unit;
-                            _unitErrorText = null;
-                          }),
-                        ),
-                        if (_errorMessage != null) ...[
-                          const SizedBox(height: 12),
-                          Text(
-                            _errorMessage!,
-                            style: TextStyle(color: Theme.of(context).colorScheme.error),
-                          ),
-                        ],
-                        const SizedBox(height: 20),
-                        ElevatedButton.icon(
-                          onPressed: _submitting ? null : _submit,
-                          icon: _submitting
-                              ? const SizedBox(
-                                  height: 18,
-                                  width: 18,
-                                  child: CircularProgressIndicator(
-                                    strokeWidth: 2,
-                                    color: Colors.white,
-                                  ),
-                                )
-                              : const Icon(Icons.login, size: 18),
-                          label: Text(_submitting ? 'Memproses...' : 'Masuk'),
-                        ),
-                        const SizedBox(height: 20),
-                        Divider(color: Colors.grey.shade200),
-                        const SizedBox(height: 12),
-                        Text(
-                          'Butuh bantuan? Hubungi kami',
-                          style: Theme.of(context)
-                              .textTheme
-                              .bodySmall
-                              ?.copyWith(fontWeight: FontWeight.bold),
-                          textAlign: TextAlign.center,
-                        ),
-                        const SizedBox(height: 10),
-                        const _HelpLine(icon: Icons.chat_bubble_outline, text: 'WhatsApp 082312122021'),
-                        const SizedBox(height: 6),
-                        const _HelpLine(icon: Icons.call_outlined, text: '0227780188'),
-                        const SizedBox(height: 6),
-                        const _HelpLine(icon: Icons.public, text: 'eprjatinangor.com'),
+                        _HelpChip(icon: Icons.chat_bubble_outline_rounded, text: '0823 1212 2021'),
+                        _HelpChip(icon: Icons.call_outlined, text: '(022) 778 0188'),
+                        _HelpChip(icon: Icons.language_rounded, text: 'eprjatinangor.com'),
                       ],
                     ),
-                  ),
-                ],
+                  ],
+                ),
               ),
             ),
           ),
@@ -231,29 +192,34 @@ class _FieldLabel extends StatelessWidget {
   Widget build(BuildContext context) {
     return Text(
       text,
-      style: Theme.of(context).textTheme.bodySmall?.copyWith(fontWeight: FontWeight.w600),
+      style: Theme.of(context).textTheme.labelLarge?.copyWith(fontWeight: FontWeight.w600),
     );
   }
 }
 
-class _HelpLine extends StatelessWidget {
-  const _HelpLine({required this.icon, required this.text});
+class _HelpChip extends StatelessWidget {
+  const _HelpChip({required this.icon, required this.text});
 
   final IconData icon;
   final String text;
 
   @override
   Widget build(BuildContext context) {
-    return Row(
-      mainAxisAlignment: MainAxisAlignment.center,
-      children: [
-        Icon(icon, size: 15, color: AppColors.primaryOlive),
-        const SizedBox(width: 6),
-        Text(
-          text,
-          style: const TextStyle(color: AppColors.primaryOlive, fontWeight: FontWeight.w600),
-        ),
-      ],
+    final cs = Theme.of(context).colorScheme;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+      decoration: BoxDecoration(
+        color: cs.surfaceContainer,
+        borderRadius: BorderRadius.circular(999),
+      ),
+      child: Row(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, size: 15, color: cs.primary),
+          const SizedBox(width: 6),
+          Text(text, style: Theme.of(context).textTheme.labelMedium),
+        ],
+      ),
     );
   }
 }
