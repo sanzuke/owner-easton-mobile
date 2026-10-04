@@ -1,15 +1,18 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
+import 'package:go_router/go_router.dart';
 
 import '../../../core/network/api_envelope.dart';
 import '../application/auth_providers.dart';
 import '../data/unit_repository.dart';
-import 'otp_verify_screen.dart';
+import 'biometric_offer.dart';
+import 'forgot_password_screen.dart';
+import 'password_field.dart';
 import 'unit_picker_field.dart';
 
-/// Layar login — No HP + ID BAST → kirim OTP WhatsApp (lihat docs/96 §2, §3).
-/// Gaya: latar polos, logo dalam wadah lembut, judul rata kiri, tanpa kartu
-/// berbayang; seluruh warna dari ColorScheme (aman di mode terang & gelap).
+/// Layar login — No WhatsApp terdaftar + unit + password (docs/96b §4).
+/// Password awal = 6 digit terakhir NIK; wajib diganti saat login pertama.
+/// Gaya mengikuti portal web owner; seluruh warna dari ColorScheme.
 class LoginScreen extends ConsumerStatefulWidget {
   const LoginScreen({super.key});
 
@@ -20,6 +23,7 @@ class LoginScreen extends ConsumerStatefulWidget {
 class _LoginScreenState extends ConsumerState<LoginScreen> {
   final _formKey = GlobalKey<FormState>();
   final _hpController = TextEditingController();
+  final _passwordController = TextEditingController();
   Unit? _selectedUnit;
   bool _submitting = false;
   String? _errorMessage;
@@ -28,6 +32,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
   @override
   void dispose() {
     _hpController.dispose();
+    _passwordController.dispose();
     super.dispose();
   }
 
@@ -44,18 +49,20 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
       _errorMessage = null;
     });
     try {
-      final repo = ref.read(authRepositoryProvider);
-      final result = await repo.requestOtp(
-        noHp: _hpController.text.trim(),
-        idBast: _selectedUnit!.idBast,
-      );
+      final result = await ref.read(authRepositoryProvider).login(
+            noHp: _hpController.text.trim(),
+            idBast: _selectedUnit!.idBast,
+            password: _passwordController.text,
+          );
+      ref.invalidate(authStateProvider);
       if (!mounted) return;
-      Navigator.of(context).push(
-        MaterialPageRoute(
-          builder: (_) =>
-              OtpVerifyScreen(uid: result.uid, noHp: _hpController.text.trim()),
-        ),
-      );
+      if (result.mustChangePassword) {
+        context.go('/ganti-password');
+        return;
+      }
+      await tawarkanBiometrik(context, ref);
+      if (!mounted) return;
+      context.go('/dashboard');
     } on ApiException catch (e) {
       setState(() => _errorMessage = e.message);
     } finally {
@@ -179,7 +186,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                           ),
                           const SizedBox(height: 6),
                           Text(
-                            'Kode OTP dikirim ke nomor WhatsApp yang terdaftar.',
+                            'Nomor WhatsApp yang terdaftar pada unit Anda.',
                             style: theme.textTheme.bodySmall?.copyWith(
                               color: cs.onSurfaceVariant,
                               fontWeight: FontWeight.w600,
@@ -194,6 +201,45 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                               _selectedUnit = unit;
                               _unitErrorText = null;
                             }),
+                          ),
+                          const SizedBox(height: 20),
+                          const _FieldLabel('Password'),
+                          const SizedBox(height: 8),
+                          PasswordField(
+                            controller: _passwordController,
+                            textInputAction: TextInputAction.done,
+                            onSubmitted: (_) => _submitting ? null : _submit(),
+                            validator: (v) => (v == null || v.isEmpty) ? 'Password wajib diisi' : null,
+                          ),
+                          const SizedBox(height: 6),
+                          Text.rich(
+                            TextSpan(
+                              style: theme.textTheme.bodySmall?.copyWith(
+                                color: cs.onSurfaceVariant,
+                                fontWeight: FontWeight.w600,
+                              ),
+                              children: [
+                                const TextSpan(
+                                  text: 'Pertama kali login? Gunakan 6 digit terakhir NIK Anda. ',
+                                ),
+                                WidgetSpan(
+                                  alignment: PlaceholderAlignment.baseline,
+                                  baseline: TextBaseline.alphabetic,
+                                  child: GestureDetector(
+                                    onTap: () => Navigator.of(context).push(
+                                      MaterialPageRoute(builder: (_) => const ForgotPasswordScreen()),
+                                    ),
+                                    child: Text(
+                                      'Lupa password?',
+                                      style: theme.textTheme.bodySmall?.copyWith(
+                                        color: cs.primary,
+                                        fontWeight: FontWeight.w800,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            ),
                           ),
                           if (_errorMessage != null) ...[
                             const SizedBox(height: 16),
@@ -233,7 +279,7 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                                       color: cs.onPrimary,
                                     ),
                                   )
-                                : const Text('Kirim kode OTP'),
+                                : const Text('Masuk'),
                           ),
                         ],
                       ),

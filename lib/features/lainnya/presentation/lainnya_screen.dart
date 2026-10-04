@@ -8,6 +8,7 @@ import '../../../core/widgets/menu_icon_card.dart';
 import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/presentation/biometric_toggle_tile.dart';
+import '../../auth/presentation/change_password_screen.dart';
 import '../../profil/presentation/profil_screen.dart';
 import '../../tiket/presentation/request_screen.dart';
 
@@ -117,6 +118,18 @@ class LainnyaScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 12),
           const BiometricToggleTile(),
+          const SizedBox(height: 12),
+          Card(
+            child: ListTile(
+              leading: const Icon(Icons.lock_reset_rounded),
+              title: const Text('Ubah password'),
+              subtitle: const Text('Berlaku juga untuk portal web owner'),
+              trailing: const Icon(Icons.chevron_right_rounded),
+              onTap: () => Navigator.of(context).push(
+                MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
+              ),
+            ),
+          ),
         ],
       ),
     );

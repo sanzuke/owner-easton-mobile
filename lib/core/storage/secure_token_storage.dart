@@ -28,4 +28,12 @@ class SecureTokenStorage {
   Future<void> setBiometricEnabled(bool enabled) => enabled
       ? _storage.write(key: AppConstants.prefsBiometricEnabledKey, value: 'true')
       : _storage.delete(key: AppConstants.prefsBiometricEnabledKey);
+
+  /// Penanda wajib-ganti-password (login pertama dengan password default).
+  Future<bool> isPasswordChangePending() async =>
+      await _storage.read(key: AppConstants.prefsPasswordChangePendingKey) == 'true';
+
+  Future<void> setPasswordChangePending(bool pending) => pending
+      ? _storage.write(key: AppConstants.prefsPasswordChangePendingKey, value: 'true')
+      : _storage.delete(key: AppConstants.prefsPasswordChangePendingKey);
 }

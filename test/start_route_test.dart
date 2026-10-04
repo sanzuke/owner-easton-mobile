@@ -19,10 +19,12 @@ Future<(String, SecureTokenStorage)> _route({
   String? token,
   bool biometricEnabled = false,
   bool available = true,
+  bool passwordChangePending = false,
 }) async {
   FlutterSecureStorage.setMockInitialValues({
     'sanctum_token': ?token,
     if (biometricEnabled) 'biometric_enabled': 'true',
+    if (passwordChangePending) 'password_change_pending': 'true',
   });
   final storage = SecureTokenStorage();
   final container = ProviderContainer(overrides: [
@@ -57,5 +59,17 @@ void main() {
 
   test('flag biometrik tanpa token tidak membuka gerbang', () async {
     expect((await _route(biometricEnabled: true)).$1, '/login');
+  });
+
+  test('wajib ganti password default -> /ganti-password, mendahului gerbang biometrik', () async {
+    expect((await _route(token: 't', passwordChangePending: true)).$1, '/ganti-password');
+    expect(
+      (await _route(token: 't', passwordChangePending: true, biometricEnabled: true)).$1,
+      '/ganti-password',
+    );
+  });
+
+  test('penanda ganti password tanpa token tetap /login', () async {
+    expect((await _route(passwordChangePending: true)).$1, '/login');
   });
 }
