@@ -36,4 +36,10 @@ class SecureTokenStorage {
   Future<void> setPasswordChangePending(bool pending) => pending
       ? _storage.write(key: AppConstants.prefsPasswordChangePendingKey, value: 'true')
       : _storage.delete(key: AppConstants.prefsPasswordChangePendingKey);
+
+  /// Pilihan tampilan dashboard ('otomatis' | 'nyaman' | 'modern'); null = belum pernah dipilih.
+  Future<String?> readTampilan() => _storage.read(key: AppConstants.prefsTampilanKey);
+
+  Future<void> saveTampilan(String value) =>
+      _storage.write(key: AppConstants.prefsTampilanKey, value: value);
 }

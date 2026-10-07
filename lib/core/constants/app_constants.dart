@@ -22,4 +22,11 @@ class AppConstants {
   /// menggantinya (backend `must_change_password`). Selama true, app selalu
   /// diarahkan ke layar ganti password.
   static const String prefsPasswordChangePendingKey = 'password_change_pending';
+
+  /// Key preferensi tampilan dashboard (otomatis / nyaman / modern).
+  static const String prefsTampilanKey = 'tampilan_dashboard';
+
+  /// Kontak Tenant Relation (sama dengan pesan error login di API).
+  static const String kontakPengelola = '082312122021';
+  static const String kontakPengelolaTampil = '0823-1212-2021';
 }

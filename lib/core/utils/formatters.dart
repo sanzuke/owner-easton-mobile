@@ -10,3 +10,8 @@ String formatRupiah(num value) {
 String formatTanggal(DateTime date) {
   return DateFormat('d MMM y', 'id_ID').format(date);
 }
+
+/// Format tanggal panjang "10 Agustus 2026".
+String formatTanggalPanjang(DateTime date) {
+  return DateFormat('d MMMM y', 'id_ID').format(date);
+}
