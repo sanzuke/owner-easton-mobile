@@ -76,3 +76,15 @@ flutter run
 - Fitur Tier 2: bayar langsung dari app, upload KTP/KK/foto (repository sudah
   siap di `profil_repository.dart`, tinggal UI picker file), PBB, blog/pengumuman
 - Fitur Tier 3: menunggu keputusan scope (lihat docs/96 §2, §8)
+
+## Build dengan nomor build otomatis
+
+Nomor build (android `versionCode`, iOS `CFBundleVersion`) dibuat otomatis naik dari waktu build
+(menit sejak 1 Jan 2026 UTC), jadi APK baru selalu bisa dipasang di atas yang lama dan tidak perlu
+mengedit `pubspec.yaml` tiap build. Nama versi (`1.0.0`) tetap dari `version:` di `pubspec.yaml`.
+
+- Windows: `.\scripts\build.ps1 apk --debug` (atau `appbundle --release`)
+- Linux/macOS/WSL: `scripts/build.sh apk --debug`
+
+`flutter run` tidak melewati skrip ini dan memakai angka build dari `pubspec.yaml`; untuk mencoba di
+perangkat cukup begitu. Pakai skrip ini untuk APK/AAB yang dibagikan atau diunggah.
