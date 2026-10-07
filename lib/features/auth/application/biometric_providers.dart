@@ -8,6 +8,7 @@ final biometricServiceProvider = Provider<BiometricService>((ref) => BiometricSe
 
 /// Rute awal setelah splash:
 /// - belum login                                   → `/login`
+/// - login tapi masih wajib ganti password default → `/ganti-password`
 /// - login + buka cepat aktif + biometrik tersedia → `/unlock`
 /// - login + buka cepat nonaktif                   → `/dashboard`
 /// - login + buka cepat aktif tapi biometrik di perangkat sudah hilang
@@ -17,6 +18,7 @@ final startRouteProvider = FutureProvider<String>((ref) async {
   if (!loggedIn) return '/login';
 
   final storage = ref.watch(secureTokenStorageProvider);
+  if (await storage.isPasswordChangePending()) return '/ganti-password';
   if (!await storage.isBiometricEnabled()) return '/dashboard';
 
   if (await ref.watch(biometricServiceProvider).isAvailable()) return '/unlock';

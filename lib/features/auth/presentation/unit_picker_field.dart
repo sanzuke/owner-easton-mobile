@@ -72,6 +72,7 @@ class _UnitPickerFieldState extends ConsumerState<UnitPickerField> {
           onChanged: _onChanged,
           decoration: InputDecoration(
             hintText: 'Cari atau pilih unit...',
+            prefixIcon: const Icon(Icons.apartment_rounded, size: 20),
             suffixIcon: const Icon(Icons.expand_more),
             errorText: widget.errorText,
           ),
@@ -92,37 +93,50 @@ class _UnitResultsPanel extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final unitsAsync = ref.watch(unitSearchProvider(query));
 
+    final cs = Theme.of(context).colorScheme;
+
     return Container(
-      margin: const EdgeInsets.only(top: 4),
+      margin: const EdgeInsets.only(top: 6),
       constraints: const BoxConstraints(maxHeight: 220),
+      clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
-        border: Border.all(color: Colors.grey.shade300),
-        borderRadius: BorderRadius.circular(8),
+        color: cs.surface,
+        border: Border.all(color: cs.outlineVariant),
+        borderRadius: BorderRadius.circular(14),
       ),
       child: unitsAsync.when(
         loading: () => const Padding(
           padding: EdgeInsets.all(16),
           child: Center(
-            child: SizedBox(height: 18, width: 18, child: CircularProgressIndicator(strokeWidth: 2)),
+            child: SizedBox(
+              height: 18,
+              width: 18,
+              child: CircularProgressIndicator(strokeWidth: 2),
+            ),
           ),
         ),
         error: (err, _) => Padding(
-          padding: const EdgeInsets.all(12),
-          child: Text('Gagal memuat unit: $err', style: const TextStyle(fontSize: 12)),
+          padding: const EdgeInsets.all(14),
+          child: Text(
+            'Tidak dapat memuat daftar unit. Periksa koneksi internet lalu coba lagi.',
+            style: TextStyle(fontSize: 13, color: cs.error),
+          ),
         ),
         data: (units) {
           if (units.isEmpty) {
             return const Padding(
               padding: EdgeInsets.all(12),
-              child: Text('Unit tidak ditemukan.', style: TextStyle(fontSize: 12)),
+              child: Text(
+                'Unit tidak ditemukan.',
+                style: TextStyle(fontSize: 12),
+              ),
             );
           }
           return ListView.separated(
             shrinkWrap: true,
             padding: EdgeInsets.zero,
             itemCount: units.length,
-            separatorBuilder: (context, index) => Divider(height: 1, color: Colors.grey.shade200),
+            separatorBuilder: (context, index) => const Divider(height: 1),
             itemBuilder: (context, index) {
               final unit = units[index];
               return ListTile(

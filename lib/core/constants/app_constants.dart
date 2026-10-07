@@ -17,4 +17,9 @@ class AppConstants {
 
   /// Key preferensi lokal: apakah user mengaktifkan buka cepat biometrik.
   static const String prefsBiometricEnabledKey = 'biometric_enabled';
+
+  /// Key penanda: login terakhir memakai password default dan owner belum
+  /// menggantinya (backend `must_change_password`). Selama true, app selalu
+  /// diarahkan ke layar ganti password.
+  static const String prefsPasswordChangePendingKey = 'password_change_pending';
 }

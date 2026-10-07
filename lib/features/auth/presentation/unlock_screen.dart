@@ -42,8 +42,8 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
     }
   }
 
-  /// Keluar dari sesi tersimpan dan login ulang dengan OTP.
-  Future<void> _pakaiOtp() async {
+  /// Keluar dari sesi tersimpan dan login ulang dengan password.
+  Future<void> _pakaiPassword() async {
     await ref.read(authRepositoryProvider).logout().catchError((_) {});
     ref.invalidate(authStateProvider);
     ref.invalidate(startRouteProvider);
@@ -80,7 +80,7 @@ class _UnlockScreenState extends ConsumerState<UnlockScreen> {
               else ...[
                 ElevatedButton(onPressed: _unlock, child: const Text('Coba lagi')),
                 const SizedBox(height: 8),
-                TextButton(onPressed: _pakaiOtp, child: const Text('Masuk dengan OTP')),
+                TextButton(onPressed: _pakaiPassword, child: const Text('Masuk dengan password')),
               ],
             ],
           ),

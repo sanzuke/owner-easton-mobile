@@ -37,49 +37,62 @@ class DashboardScreen extends ConsumerWidget {
             data: (summary) => Column(
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: [
-                // Banner sambutan — pengganti app bar, mengikuti desain resmi
-                // (tidak ada app bar terpisah, banner olive langsung di atas).
-                Container(
-                  width: double.infinity,
-                  padding: const EdgeInsets.fromLTRB(20, 24, 20, 24),
-                  color: AppColors.primaryOlive,
-                  child: SafeArea(
-                    bottom: false,
+                // Banner sambutan — kartu lembut berwarna primaryContainer
+                // (bukan blok warna penuh), supaya tidak mencolok.
+                SafeArea(
+                  bottom: false,
+                  child: Container(
+                    margin: const EdgeInsets.fromLTRB(16, 12, 16, 0),
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      color: Theme.of(context).colorScheme.primaryContainer,
+                      borderRadius: BorderRadius.circular(24),
+                    ),
                     child: Row(
                       children: [
                         Expanded(
                           child: Column(
                             crossAxisAlignment: CrossAxisAlignment.start,
                             children: [
-                              const Text(
-                                'Selamat Datang di Portal Owner',
+                              Text(
+                                'Selamat datang',
                                 style: TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 18,
-                                  fontWeight: FontWeight.bold,
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  fontSize: 20,
+                                  fontWeight: FontWeight.w800,
+                                  letterSpacing: -0.3,
                                 ),
                               ),
                               const SizedBox(height: 4),
                               Text(
                                 'Unit ${summary.unitCode ?? '-'}',
-                                style: const TextStyle(
-                                    color: Colors.white, fontWeight: FontWeight.w600),
+                                style: TextStyle(
+                                  color: Theme.of(context).colorScheme.onPrimaryContainer,
+                                  fontWeight: FontWeight.w600,
+                                ),
                               ),
                               const SizedBox(height: 2),
-                              const Text(
-                                'Ini adalah halaman informasi untuk owner',
-                                style: TextStyle(color: Colors.white70, fontSize: 12),
+                              Text(
+                                'Portal informasi owner Easton Park',
+                                style: TextStyle(
+                                  color: Theme.of(context)
+                                      .colorScheme
+                                      .onPrimaryContainer
+                                      .withValues(alpha: 0.7),
+                                  fontSize: 12,
+                                ),
                               ),
                             ],
                           ),
                         ),
                         Container(
-                          padding: const EdgeInsets.all(10),
+                          padding: const EdgeInsets.all(12),
                           decoration: BoxDecoration(
-                            color: Colors.white.withValues(alpha: 0.15),
-                            borderRadius: BorderRadius.circular(12),
+                            color: Theme.of(context).colorScheme.surface.withValues(alpha: 0.6),
+                            borderRadius: BorderRadius.circular(16),
                           ),
-                          child: const Icon(Icons.apartment_rounded, color: Colors.white, size: 28),
+                          child: Icon(Icons.apartment_rounded,
+                              color: Theme.of(context).colorScheme.primary, size: 28),
                         ),
                       ],
                     ),
@@ -112,15 +125,15 @@ class DashboardScreen extends ConsumerWidget {
                       Container(
                         padding: const EdgeInsets.all(16),
                         decoration: BoxDecoration(
-                          color: AppColors.primaryOlive.withValues(alpha: 0.08),
+                          color: AppColors.brandGold.withValues(alpha: 0.08),
                           borderRadius: BorderRadius.circular(16),
                           border:
-                              Border.all(color: AppColors.primaryOlive.withValues(alpha: 0.3)),
+                              Border.all(color: AppColors.brandGold.withValues(alpha: 0.3)),
                         ),
                         child: Row(
                           crossAxisAlignment: CrossAxisAlignment.start,
                           children: [
-                            const Icon(Icons.home_work_outlined, color: AppColors.primaryOlive),
+                            const Icon(Icons.home_work_outlined, color: AppColors.brandGold),
                             const SizedBox(width: 12),
                             Expanded(
                               child: Column(
@@ -175,7 +188,7 @@ class _PengumumanAcaraCard extends ConsumerWidget {
           child: Container(
             padding: const EdgeInsets.all(16),
             decoration: BoxDecoration(
-              color: const Color(0xFFE9E7FB),
+              color: Theme.of(context).colorScheme.secondaryContainer,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Column(
@@ -293,9 +306,9 @@ class _InfoCard extends StatelessWidget {
                     Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Text(linkLabel, style: const TextStyle(color: AppColors.primaryOlive)),
+                        Text(linkLabel, style: const TextStyle(color: AppColors.brandGold)),
                         const SizedBox(width: 4),
-                        const Icon(Icons.arrow_forward, size: 14, color: AppColors.primaryOlive),
+                        const Icon(Icons.arrow_forward, size: 14, color: AppColors.brandGold),
                       ],
                     ),
                   ],

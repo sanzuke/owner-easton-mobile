@@ -60,7 +60,7 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                 Expanded(
                   child: _TabTile(
                     icon: Icons.bolt,
-                    iconBg: const Color(0xFFE0B400),
+                    iconBg: AppColors.goldAccent,
                     label: 'ELECTRICITY',
                     selected: _segment == 1,
                     onTap: () => setState(() => _segment = 1),
@@ -158,7 +158,7 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                       ),
                                       FilledButton.icon(
                                         style: FilledButton.styleFrom(
-                                          backgroundColor: AppColors.primaryOlive,
+                                          backgroundColor: AppColors.brandGold,
                                         ),
                                         onPressed: () => Navigator.of(context).push(
                                           MaterialPageRoute(
@@ -212,10 +212,10 @@ class _TabTile extends StatelessWidget {
       child: Container(
         padding: const EdgeInsets.symmetric(vertical: 16),
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppColors.primaryOlive : Colors.grey.shade200,
+            color: selected ? AppColors.brandGold : Theme.of(context).colorScheme.outlineVariant,
             width: selected ? 2 : 1,
           ),
         ),
