@@ -9,6 +9,7 @@ import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../auth/presentation/biometric_toggle_tile.dart';
 import '../../auth/presentation/change_password_screen.dart';
+import '../../dashboard/presentation/tampilan_screen.dart';
 import '../../profil/presentation/profil_screen.dart';
 import '../../tiket/presentation/request_screen.dart';
 
@@ -102,9 +103,9 @@ class LainnyaScreen extends ConsumerWidget {
                 icon: Icons.settings_outlined,
                 iconColor: Colors.grey.shade700,
                 title: 'Pengaturan',
-                subtitle: 'Tema & ukuran huruf',
+                subtitle: 'Tampilan aplikasi',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ComingSoonScreen(title: 'Pengaturan')),
+                  MaterialPageRoute(builder: (_) => const TampilanScreen()),
                 ),
               ),
               MenuIconCard(
