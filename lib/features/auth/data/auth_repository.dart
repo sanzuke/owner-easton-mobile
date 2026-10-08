@@ -13,12 +13,19 @@ class LoginResult {
 /// Login memakai password (OTP WA sudah dicabut); password dipakai bersama
 /// portal web owner.
 class AuthRepository {
-  AuthRepository({required ApiClient apiClient, required SecureTokenStorage tokenStorage})
-      : _api = apiClient,
+  AuthRepository({
+    required ApiClient apiClient,
+    required SecureTokenStorage tokenStorage,
+    this.sebelumLogout,
+  })  : _api = apiClient,
         _tokenStorage = tokenStorage;
 
   final ApiClient _api;
   final SecureTokenStorage _tokenStorage;
+
+  /// Dipanggil SEBELUM `/auth/logout` dan penghapusan token (token login masih
+  /// berlaku): mis. melepas token push perangkat dari akun ini. Kegagalannya diabaikan.
+  final Future<void> Function()? sebelumLogout;
 
   /// No WA terdaftar + unit + password → simpan Sanctum token. Bila backend
   /// menandai `must_change_password`, penanda lokal dipasang supaya app tetap
@@ -78,6 +85,9 @@ class AuthRepository {
   }
 
   Future<void> logout() async {
+    try {
+      await sebelumLogout?.call();
+    } catch (_) {}
     try {
       await _api.post('/auth/logout');
     } finally {

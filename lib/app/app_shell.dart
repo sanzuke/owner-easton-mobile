@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../core/push/push_providers.dart';
 import '../core/theme/tampilan.dart';
 import '../features/acara/presentation/acara_screen.dart';
 import '../features/dashboard/application/tampilan_providers.dart';
@@ -13,7 +14,7 @@ import 'shell_provider.dart';
 /// Shell utama setelah login — bottom navigation 4 tab: Beranda, Tagihan, Acara, Lainnya
 /// (Tiket/Profil/Pembayaran diakses dari dalam Tagihan/Lainnya/Beranda, bukan tab sendiri).
 /// Pada tema Modern, bar bawah di Beranda ikut gelap seperti prototipe desain.
-class AppShell extends ConsumerWidget {
+class AppShell extends ConsumerStatefulWidget {
   const AppShell({super.key});
 
   static const _pages = [
@@ -24,7 +25,19 @@ class AppShell extends ConsumerWidget {
   ];
 
   @override
-  Widget build(BuildContext context, WidgetRef ref) {
+  ConsumerState<AppShell> createState() => _AppShellState();
+}
+
+class _AppShellState extends ConsumerState<AppShell> {
+  @override
+  void initState() {
+    super.initState();
+    // Shell hanya tampil setelah login/unlock: daftarkan perangkat untuk push (gagal = diam).
+    WidgetsBinding.instance.addPostFrameCallback((_) => ref.read(pushServiceProvider).mulai());
+  }
+
+  @override
+  Widget build(BuildContext context) {
     final index = ref.watch(shellTabProvider);
     final modern = index == 0 && ref.watch(tampilanModeProvider) == TampilanMode.modern;
     const p = DashPalette.modernGelap;
@@ -41,7 +54,7 @@ class AppShell extends ConsumerWidget {
     );
 
     return Scaffold(
-      body: IndexedStack(index: index, children: _pages),
+      body: IndexedStack(index: index, children: AppShell._pages),
       bottomNavigationBar: modern
           ? NavigationBarTheme(
               data: NavigationBarThemeData(

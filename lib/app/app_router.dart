@@ -4,9 +4,11 @@ import '../features/auth/presentation/change_password_screen.dart';
 import '../features/auth/presentation/login_screen.dart';
 import '../features/auth/presentation/unlock_screen.dart';
 import 'app_shell.dart';
+import 'navigator_keys.dart';
 import 'splash_screen.dart';
 
 final appRouter = GoRouter(
+  navigatorKey: rootNavigatorKey,
   initialLocation: '/',
   routes: [
     GoRoute(path: '/', builder: (context, state) => const SplashScreen()),

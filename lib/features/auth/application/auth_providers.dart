@@ -1,6 +1,7 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/core_providers.dart';
+import '../../../core/push/push_providers.dart';
 import '../data/auth_repository.dart';
 import '../data/unit_repository.dart';
 
@@ -8,6 +9,7 @@ final authRepositoryProvider = Provider<AuthRepository>(
   (ref) => AuthRepository(
     apiClient: ref.watch(apiClientProvider),
     tokenStorage: ref.watch(secureTokenStorageProvider),
+    sebelumLogout: () => ref.read(pushServiceProvider).berhenti(),
   ),
 );
 
