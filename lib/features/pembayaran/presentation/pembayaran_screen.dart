@@ -18,7 +18,24 @@ class PembayaranScreen extends ConsumerWidget {
         onRefresh: () async => ref.invalidate(riwayatBayarProvider),
         child: riwayatAsync.when(
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (err, _) => Center(child: Text('Gagal memuat riwayat: $err')),
+          error: (err, _) => ListView(
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(24, 64, 24, 0),
+                child: Column(
+                  children: [
+                    const Text('Riwayat pembayaran belum bisa dimuat. Periksa koneksi lalu tarik layar ke bawah untuk mencoba lagi.',
+                        textAlign: TextAlign.center),
+                    const SizedBox(height: 12),
+                    FilledButton(
+                      onPressed: () => ref.invalidate(riwayatBayarProvider),
+                      child: const Text('Coba lagi'),
+                    ),
+                  ],
+                ),
+              ),
+            ],
+          ),
           data: (list) {
             if (list.isEmpty) {
               return ListView(
@@ -39,11 +56,15 @@ class PembayaranScreen extends ConsumerWidget {
                 return Card(
                   child: ListTile(
                     leading: const Icon(Icons.receipt_long_outlined),
-                    title: Text(formatRupiah(item.nominal)),
+                    title: Text(formatRupiah(item.jumlah)),
                     subtitle: Text(
-                      '${item.metode} • ${item.tanggal != null ? formatTanggal(item.tanggal!) : '-'}',
+                      [
+                        '${item.metode} • ${item.tanggal != null ? formatTanggal(item.tanggal!) : '-'}',
+                        if (item.kwitansi.isNotEmpty) item.kwitansi,
+                        if (item.keterangan.isNotEmpty) item.keterangan,
+                      ].join('\n'),
                     ),
-                    trailing: Text(item.status),
+                    isThreeLine: item.kwitansi.isNotEmpty || item.keterangan.isNotEmpty,
                   ),
                 );
               },
