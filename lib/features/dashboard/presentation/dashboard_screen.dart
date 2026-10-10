@@ -533,6 +533,8 @@ class _FeatureGrid extends ConsumerWidget {
 
     return GridView.builder(
       shrinkWrap: true,
+      // Tanpa ini GridView menambah padding atas setinggi status bar (beranda tidak di dalam SafeArea) -> celah di bawah label.
+      padding: EdgeInsets.zero,
       physics: const NeverScrollableScrollPhysics(),
       itemCount: fitur.length,
       gridDelegate: SliverGridDelegateWithFixedCrossAxisCount(

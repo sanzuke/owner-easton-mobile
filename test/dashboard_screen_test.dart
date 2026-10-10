@@ -136,5 +136,21 @@ void main() {
     expect(find.text('BERITA TERBARU'), findsNothing);
     expect(find.text('Lihat semua'), findsNothing);
   });
+  testWidgets('SEMUA FITUR: jarak label ke kartu pertama kecil walau ada status bar', (tester) async {
+    // GridView tanpa padding eksplisit menambah padding atas = tinggi status bar (beranda tidak di dalam SafeArea),
+    // sehingga muncul celah besar di bawah label.
+    tester.view.padding = const FakeViewPadding(top: 48);
+    tester.view.viewPadding = const FakeViewPadding(top: 48);
+    addTearDown(tester.view.resetPadding);
+    addTearDown(tester.view.resetViewPadding);
+    await _pasang(tester, _ringkasan(lahir: DateTime(1960, 1, 1), tagihan: belumLunas));
+
+    final labelBawah = tester.getBottomLeft(find.text('SEMUA FITUR')).dy;
+    final kartuAtas =
+        tester.getTopLeft(find.ancestor(of: find.text('Tagihan'), matching: find.byType(InkWell)).first).dy;
+
+    expect(kartuAtas - labelBawah, lessThanOrEqualTo(16));
+  });
+
 
 }
