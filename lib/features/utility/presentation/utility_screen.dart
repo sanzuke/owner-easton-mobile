@@ -177,38 +177,38 @@ class _KartuBulan extends StatelessWidget {
       child: Padding(
         padding: const EdgeInsets.fromLTRB(16, 12, 16, 12),
         child: Row(
-          crossAxisAlignment: CrossAxisAlignment.start,
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(bulan, style: text.bodyLarge?.copyWith(fontWeight: FontWeight.w700)),
+                  Text(bulan, style: text.bodyLarge),
                   const SizedBox(height: 4),
                   Text(
                     'Meter ${_angka(item.meterAwal)} → ${_angka(item.meterAkhir)}',
                     style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                   ),
-                  const SizedBox(height: 6),
+                  const SizedBox(height: 2),
                   Text(
-                    ditagih ? 'Tagihan ${formatRupiah(item.tagihan!)}' : 'Belum ditagihkan',
-                    style: text.bodySmall?.copyWith(
-                      color: ditagih ? cs.onSurface : cs.onSurfaceVariant,
-                      fontWeight: ditagih ? FontWeight.w600 : FontWeight.w400,
-                    ),
+                    'Pemakaian ${_angka(item.pakai)} m³',
+                    style: text.bodyMedium?.copyWith(color: cs.onSurfaceVariant),
                   ),
                 ],
               ),
             ),
-            const SizedBox(width: 8),
+            const SizedBox(width: 12),
             Column(
               crossAxisAlignment: CrossAxisAlignment.end,
               children: [
-                Text(
-                  _angka(item.pakai),
-                  style: text.headlineSmall?.copyWith(color: cs.primary, fontWeight: FontWeight.w800),
-                ),
-                Text('m³', style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                if (ditagih) ...[
+                  Text('Tagihan', style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
+                  Text(
+                    formatRupiah(item.tagihan!),
+                    style: text.titleLarge?.copyWith(color: cs.primary, fontWeight: FontWeight.w800),
+                  ),
+                ] else
+                  Text('Belum ditagihkan', style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant)),
               ],
             ),
           ],
