@@ -3,16 +3,18 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../application/tiket_providers.dart';
+import '../data/tiket_repository.dart';
 
-/// Detail tiket: histori + lampiran (lihat docs/96 update 19 Agustus).
+/// Detail tiket: timeline status + lampiran (docs/96b §9). [tiket] = baris dari daftar, dipakai
+/// untuk nama tipe karena `GET /tiket/{id}` tidak membawanya.
 class TiketDetailScreen extends ConsumerWidget {
-  const TiketDetailScreen({super.key, required this.id});
+  const TiketDetailScreen({super.key, required this.tiket});
 
-  final String id;
+  final Tiket tiket;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(tiketDetailProvider(id));
+    final detailAsync = ref.watch(tiketDetailProvider(tiket.id));
 
     return Scaffold(
       appBar: AppBar(title: const Text('Detail Tiket')),
@@ -28,9 +30,9 @@ class TiketDetailScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(detail.judul, style: Theme.of(context).textTheme.titleMedium),
+                    Text(detail.keterangan, style: Theme.of(context).textTheme.titleMedium),
                     const SizedBox(height: 4),
-                    Text('Tipe: ${detail.tipe}'),
+                    Text('${detail.noForm} · ${tiket.tipe}'),
                     Text('Status: ${detail.status}'),
                     if (detail.tanggal != null) Text(formatTanggal(detail.tanggal!)),
                   ],
@@ -38,10 +40,10 @@ class TiketDetailScreen extends ConsumerWidget {
               ),
             ),
             const SizedBox(height: 16),
-            Text('Histori', style: Theme.of(context).textTheme.titleSmall),
+            Text('Riwayat', style: Theme.of(context).textTheme.titleSmall),
             const SizedBox(height: 8),
-            if (detail.histori.isEmpty) const Text('Belum ada histori.'),
-            ...detail.histori.map(
+            if (detail.timeline.isEmpty) const Text('Belum ada riwayat.'),
+            ...detail.timeline.map(
               (h) => ListTile(
                 leading: const Icon(Icons.circle, size: 10),
                 title: Text(h.keterangan),
@@ -54,7 +56,7 @@ class TiketDetailScreen extends ConsumerWidget {
               const SizedBox(height: 8),
               ...detail.berkas.map((b) => ListTile(
                     leading: const Icon(Icons.attach_file),
-                    title: Text(b),
+                    title: Text(b.nama),
                   )),
             ],
           ],

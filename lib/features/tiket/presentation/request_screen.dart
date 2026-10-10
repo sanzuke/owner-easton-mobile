@@ -50,7 +50,7 @@ class RequestScreen extends ConsumerWidget {
               crossAxisSpacing: 12,
               childAspectRatio: 1.1,
               children: tipeList.map((tipe) {
-                final count = counts[tipe.kode] ?? 0;
+                final count = counts[tipe.nama] ?? 0;
                 return MenuIconCard(
                   icon: Icons.build_outlined,
                   iconColor: AppColors.pinkAccent,
@@ -58,7 +58,7 @@ class RequestScreen extends ConsumerWidget {
                   subtitle: count > 0 ? '$count permintaan' : 'Belum ada',
                   onTap: () => Navigator.of(context).push(
                     MaterialPageRoute(
-                      builder: (_) => TiketListScreen(filterTipe: tipe.kode, filterLabel: tipe.nama),
+                      builder: (_) => TiketListScreen(tipe: tipe),
                     ),
                   ),
                 );
