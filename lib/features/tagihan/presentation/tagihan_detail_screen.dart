@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import 'package:url_launcher/url_launcher.dart';
+
 import '../../../core/utils/formatters.dart';
 import '../application/tagihan_providers.dart';
+import '../data/tagihan_repository.dart';
 
 /// Detail 1 tagihan + rincian item — PDF invoice masih Tier 2/blocker
 /// dompdf, lihat docs/96 §5.
@@ -55,8 +58,47 @@ class TagihanDetailScreen extends ConsumerWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
+            if (detail.pembayaran.isNotEmpty) ...[
+              const SizedBox(height: 16),
+              Text('Riwayat Pembayaran', style: Theme.of(context).textTheme.titleSmall),
+              const SizedBox(height: 8),
+              ...detail.pembayaran.map((p) => _BarisPembayaran(p)),
+            ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+class _BarisPembayaran extends StatelessWidget {
+  const _BarisPembayaran(this.p);
+
+  final TagihanPembayaran p;
+
+  @override
+  Widget build(BuildContext context) {
+    final rincian = [
+      if (p.tanggal != null) formatTanggal(p.tanggal!),
+      if (p.creditNote) 'Credit Note' else if (p.metode != null) p.metode!,
+    ].join(' • ');
+    final url = p.cetakUrl;
+    return Card(
+      child: ListTile(
+        title: Text(p.nomor, style: const TextStyle(fontSize: 13)),
+        subtitle: Text('$rincian\n${formatRupiah(p.jumlah)}'),
+        isThreeLine: true,
+        trailing: url == null
+            ? null
+            : OutlinedButton.icon(
+                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 36), textStyle: const TextStyle(fontSize: 13)),
+                onPressed: () async {
+                  final uri = Uri.tryParse(url);
+                  if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
+                },
+                icon: const Icon(Icons.print, size: 16),
+                label: const Text('Print'),
+              ),
       ),
     );
   }
