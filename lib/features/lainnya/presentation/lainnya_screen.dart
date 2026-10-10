@@ -7,11 +7,9 @@ import '../../../core/widgets/coming_soon_screen.dart';
 import '../../../core/widgets/menu_icon_card.dart';
 import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
-import '../../auth/presentation/biometric_toggle_tile.dart';
-import '../../auth/presentation/change_password_screen.dart';
-import '../../dashboard/presentation/tampilan_screen.dart';
 import '../../profil/presentation/profil_screen.dart';
 import '../../tiket/presentation/request_screen.dart';
+import 'pengaturan_screen.dart';
 
 /// Hub menu lainnya — Request(tiket), Utility, PBB, P3SRS, Pengaturan,
 /// Keluar (mengikuti desain resmi grid 2 kolom).
@@ -103,9 +101,9 @@ class LainnyaScreen extends ConsumerWidget {
                 icon: Icons.settings_outlined,
                 iconColor: Colors.grey.shade700,
                 title: 'Pengaturan',
-                subtitle: 'Tampilan aplikasi',
+                subtitle: 'Tampilan, biometrik & password',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const TampilanScreen()),
+                  MaterialPageRoute(builder: (_) => const PengaturanScreen()),
                 ),
               ),
               MenuIconCard(
@@ -116,20 +114,6 @@ class LainnyaScreen extends ConsumerWidget {
                 onTap: () => _logout(context, ref),
               ),
             ],
-          ),
-          const SizedBox(height: 12),
-          const BiometricToggleTile(),
-          const SizedBox(height: 12),
-          Card(
-            child: ListTile(
-              leading: const Icon(Icons.lock_reset_rounded),
-              title: const Text('Ubah password'),
-              subtitle: const Text('Berlaku juga untuk portal web owner'),
-              trailing: const Icon(Icons.chevron_right_rounded),
-              onTap: () => Navigator.of(context).push(
-                MaterialPageRoute(builder: (_) => const ChangePasswordScreen()),
-              ),
-            ),
           ),
         ],
       ),
