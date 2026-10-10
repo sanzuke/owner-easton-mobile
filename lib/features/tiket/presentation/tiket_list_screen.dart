@@ -60,41 +60,53 @@ class TiketListScreen extends ConsumerWidget {
               separatorBuilder: (context, index) => const SizedBox(height: 8),
               itemBuilder: (context, index) {
                 final tiket = list[index];
+                final gaya = _GayaStatus.dari(tiket.status, Theme.of(context).brightness);
                 return Card(
                   clipBehavior: Clip.antiAlias,
+                  color: gaya.kartu,
                   child: InkWell(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => TiketDetailScreen(tiket: tiket),
                       ),
                     ),
-                    child: Padding(
-                      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+                    child: IntrinsicHeight(
                       child: Row(
-                        crossAxisAlignment: CrossAxisAlignment.start,
+                        crossAxisAlignment: CrossAxisAlignment.stretch,
                         children: [
+                          Container(width: 5, color: gaya.aksen),
                           Expanded(
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                Text(
-                                  tiket.keterangan,
-                                  maxLines: 2,
-                                  overflow: TextOverflow.ellipsis,
-                                  style: Theme.of(context).textTheme.titleSmall,
-                                ),
-                                const SizedBox(height: 4),
-                                Text(
-                                  '${tiket.noForm} · ${tiket.tipe}',
-                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
-                                      ),
-                                ),
-                              ],
+                            child: Padding(
+                              padding: const EdgeInsets.fromLTRB(14, 12, 12, 12),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Expanded(
+                                    child: Column(
+                                      crossAxisAlignment: CrossAxisAlignment.start,
+                                      children: [
+                                        Text(
+                                          tiket.keterangan,
+                                          maxLines: 2,
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context).textTheme.titleSmall,
+                                        ),
+                                        const SizedBox(height: 4),
+                                        Text(
+                                          '${tiket.noForm} · ${tiket.tipe}',
+                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                                color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                              ),
+                                        ),
+                                      ],
+                                    ),
+                                  ),
+                                  const SizedBox(width: 8),
+                                  _StatusBadge(status: tiket.status, gaya: gaya),
+                                ],
+                              ),
                             ),
                           ),
-                          const SizedBox(width: 8),
-                          _StatusBadge(status: tiket.status),
                         ],
                       ),
                     ),
@@ -109,32 +121,54 @@ class TiketListScreen extends ConsumerWidget {
   }
 }
 
-/// Badge status tiket di kanan atas card. "Ditutup" hijau seperti badge lunas di Beranda;
-/// status lain netral.
+/// Tiga kelompok status supaya mana yang belum selesai langsung terlihat:
+/// baru (kuning), diproses (biru), selesai/ditutup (hijau). Ditolak merah.
+class _GayaStatus {
+  const _GayaStatus({required this.kartu, required this.aksen});
+
+  final Color kartu;
+  final Color aksen;
+
+  static _GayaStatus dari(String status, Brightness kecerahan) {
+    final gelap = kecerahan == Brightness.dark;
+    final p = DashPalette.untuk(TampilanMode.nyaman, kecerahan);
+    switch (status) {
+      case 'Ditutup':
+      case 'Selesai':
+        return _GayaStatus(kartu: p.okBg, aksen: p.okText);
+      case 'Ditolak':
+        return _GayaStatus(kartu: p.warnBg, aksen: p.warnText);
+      case 'Diproses':
+      case 'Menunggu Pembayaran':
+        return gelap
+            ? const _GayaStatus(kartu: Color(0xFF1B2A3D), aksen: Color(0xFF8DB6E8))
+            : const _GayaStatus(kartu: Color(0xFFE3EEFB), aksen: Color(0xFF2F69A8));
+      default: // Draft, Open = permintaan baru
+        return gelap
+            ? const _GayaStatus(kartu: Color(0xFF3A3316), aksen: Color(0xFFE8C75A))
+            : const _GayaStatus(kartu: Color(0xFFFFF3D1), aksen: Color(0xFF8A6A0A));
+    }
+  }
+}
+
+/// Badge status tiket di kanan atas card, warnanya mengikuti kelompok status.
 class _StatusBadge extends StatelessWidget {
-  const _StatusBadge({required this.status});
+  const _StatusBadge({required this.status, required this.gaya});
 
   final String status;
+  final _GayaStatus gaya;
 
   @override
   Widget build(BuildContext context) {
-    final theme = Theme.of(context);
-    final cs = theme.colorScheme;
-    final p = DashPalette.untuk(TampilanMode.nyaman, theme.brightness);
-    final hijau = status == 'Ditutup';
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
       decoration: BoxDecoration(
-        color: hijau ? p.okBg : cs.surfaceContainerHigh,
+        color: gaya.aksen.withValues(alpha: 0.16),
         borderRadius: BorderRadius.circular(100),
       ),
       child: Text(
         status,
-        style: TextStyle(
-          color: hijau ? p.okText : cs.onSurfaceVariant,
-          fontSize: 11,
-          fontWeight: FontWeight.w700,
-        ),
+        style: TextStyle(color: gaya.aksen, fontSize: 11, fontWeight: FontWeight.w700),
       ),
     );
   }
