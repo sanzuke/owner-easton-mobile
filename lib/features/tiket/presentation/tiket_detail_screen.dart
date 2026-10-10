@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../core/utils/formatters.dart';
 import '../application/tiket_providers.dart';
 import '../data/tiket_repository.dart';
+import 'tiket_status.dart';
 
 /// Detail tiket: timeline status + lampiran (docs/96b §9). [tiket] = baris dari daftar, dipakai
 /// untuk nama tipe karena `GET /tiket/{id}` tidak membawanya.
@@ -30,10 +31,18 @@ class TiketDetailScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(detail.keterangan, style: Theme.of(context).textTheme.titleMedium),
+                    Row(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Expanded(
+                          child: Text(detail.keterangan, style: Theme.of(context).textTheme.titleMedium),
+                        ),
+                        const SizedBox(width: 8),
+                        TiketStatusBadge(status: detail.status),
+                      ],
+                    ),
                     const SizedBox(height: 4),
                     Text('${detail.noForm} · ${tiket.tipe}'),
-                    Text('Status: ${detail.status}'),
                     if (detail.tanggal != null) Text(formatTanggal(detail.tanggal!)),
                   ],
                 ),
