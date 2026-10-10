@@ -3,7 +3,7 @@ import 'package:flutter/material.dart';
 import '../../../core/theme/tampilan.dart';
 
 /// Palet dashboard — nilai diambil dari prototipe desain (variabel CSS `--primary`, `--ink`, dst.).
-/// Nyaman mengikuti mode terang/gelap perangkat; Modern selalu gelap.
+/// Semua gaya (Nyaman/Modern) mengikuti tema terang/gelap aplikasi.
 class DashPalette {
   const DashPalette({
     required this.modern,
@@ -102,8 +102,32 @@ class DashPalette {
     onHeaderSoft: Color(0xFFA3A8BC),
   );
 
+  static const modernTerang = DashPalette(
+    modern: true,
+    bg: Color(0xFFF1F1EE),
+    surface: Color(0xFFFFFFFF),
+    surfaceTonal: Color(0xFFF4F0DC),
+    primary: Color(0xFF8A7A1E),
+    primaryDark: Color(0xFF5E5410),
+    primaryTint: Color(0xFFF2EDD3),
+    ink: Color(0xFF232A3B),
+    inkSoft: Color(0xFF5B6478),
+    inkFaint: Color(0xFF8991A3),
+    pay: Color(0xFFC94B44),
+    warnBg: Color(0xFFFBE4E2),
+    warnText: Color(0xFFA13934),
+    okBg: Color(0xFFE3EFE1),
+    okText: Color(0xFF2F6B3A),
+    border: Color(0xFFE1E1DA),
+    headerStart: Color(0xFFF2EDD3),
+    headerEnd: Color(0xFFF1F1EE),
+    onHeader: Color(0xFF232A3B),
+    onHeaderSoft: Color(0xFF5B6478),
+  );
+
   static DashPalette untuk(TampilanMode mode, Brightness kecerahan) {
-    if (mode == TampilanMode.modern) return modernGelap;
-    return kecerahan == Brightness.dark ? nyamanGelap : nyamanTerang;
+    final gelap = kecerahan == Brightness.dark;
+    if (mode == TampilanMode.modern) return gelap ? modernGelap : modernTerang;
+    return gelap ? nyamanGelap : nyamanTerang;
   }
 }

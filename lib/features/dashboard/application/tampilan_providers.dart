@@ -21,6 +21,22 @@ class TampilanPilihanNotifier extends AsyncNotifier<TampilanPilihan> {
 final tampilanPilihanProvider =
     AsyncNotifierProvider<TampilanPilihanNotifier, TampilanPilihan>(TampilanPilihanNotifier.new);
 
+/// Tema warna tersimpan di perangkat. Bawaan: ikut tema HP.
+class TemaPilihanNotifier extends AsyncNotifier<TemaPilihan> {
+  @override
+  Future<TemaPilihan> build() async {
+    final tersimpan = await ref.watch(secureTokenStorageProvider).readTema();
+    return TemaPilihan.dari(tersimpan);
+  }
+
+  Future<void> simpan(TemaPilihan pilihan) async {
+    await ref.read(secureTokenStorageProvider).saveTema(pilihan.name);
+    state = AsyncData(pilihan);
+  }
+}
+
+final temaPilihanProvider = AsyncNotifierProvider<TemaPilihanNotifier, TemaPilihan>(TemaPilihanNotifier.new);
+
 /// Tanggal sekarang — dipisah supaya bisa diganti di tes.
 final sekarangProvider = Provider<DateTime>((ref) => DateTime.now());
 

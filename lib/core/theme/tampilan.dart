@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart' show ThemeMode;
+
 /// Pilihan tampilan dashboard yang disimpan pemilik (menu Pengaturan > Tampilan).
 enum TampilanPilihan {
   otomatis,
@@ -7,6 +9,21 @@ enum TampilanPilihan {
   static TampilanPilihan dari(String? nilai) => TampilanPilihan.values.firstWhere(
         (e) => e.name == nilai,
         orElse: () => TampilanPilihan.otomatis,
+      );
+}
+
+/// Tema warna pilihan pemilik: mengikuti HP, atau dipaksa terang/gelap. Berlaku untuk seluruh aplikasi.
+enum TemaPilihan {
+  sistem(ThemeMode.system),
+  terang(ThemeMode.light),
+  gelap(ThemeMode.dark);
+
+  const TemaPilihan(this.mode);
+  final ThemeMode mode;
+
+  static TemaPilihan dari(String? nilai) => TemaPilihan.values.firstWhere(
+        (e) => e.name == nilai,
+        orElse: () => TemaPilihan.sistem,
       );
 }
 

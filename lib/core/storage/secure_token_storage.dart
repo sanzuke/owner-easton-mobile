@@ -42,4 +42,9 @@ class SecureTokenStorage {
 
   Future<void> saveTampilan(String value) =>
       _storage.write(key: AppConstants.prefsTampilanKey, value: value);
+
+  /// Tema warna ('sistem' | 'terang' | 'gelap'); null = belum pernah dipilih.
+  Future<String?> readTema() => _storage.read(key: AppConstants.prefsTemaKey);
+
+  Future<void> saveTema(String value) => _storage.write(key: AppConstants.prefsTemaKey, value: value);
 }
