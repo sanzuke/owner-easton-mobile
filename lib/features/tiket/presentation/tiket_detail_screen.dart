@@ -41,15 +41,14 @@ class TiketDetailScreen extends ConsumerWidget {
             ),
             const SizedBox(height: 16),
             Text('Riwayat', style: Theme.of(context).textTheme.titleSmall),
-            const SizedBox(height: 8),
+            const SizedBox(height: 12),
             if (detail.timeline.isEmpty) const Text('Belum ada riwayat.'),
-            ...detail.timeline.map(
-              (h) => ListTile(
-                leading: const Icon(Icons.circle, size: 10),
-                title: Text(h.keterangan),
-                subtitle: h.tanggal != null ? Text(formatTanggal(h.tanggal!)) : null,
+            for (var i = 0; i < detail.timeline.length; i++)
+              _TimelineItem(
+                item: detail.timeline[i],
+                pertama: i == 0,
+                terakhir: i == detail.timeline.length - 1,
               ),
-            ),
             if (detail.berkas.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text('Lampiran', style: Theme.of(context).textTheme.titleSmall),
@@ -61,6 +60,78 @@ class TiketDetailScreen extends ConsumerWidget {
             ],
           ],
         ),
+      ),
+    );
+  }
+}
+
+/// Satu titik timeline: titik + garis vertikal di kiri, keterangan dan waktu di kanan.
+/// Titik terakhir (status terkini) diisi warna utama; yang sebelumnya hanya garis tepi.
+class _TimelineItem extends StatelessWidget {
+  const _TimelineItem({required this.item, required this.pertama, required this.terakhir});
+
+  final TiketTimeline item;
+  final bool pertama;
+  final bool terakhir;
+
+  @override
+  Widget build(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
+    final text = Theme.of(context).textTheme;
+    final garis = cs.outlineVariant;
+
+    return IntrinsicHeight(
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.stretch,
+        children: [
+          SizedBox(
+            width: 28,
+            child: Column(
+              children: [
+                SizedBox(
+                  height: 6,
+                  child: pertama ? null : VerticalDivider(width: 2, thickness: 2, color: garis),
+                ),
+                Container(
+                  width: 14,
+                  height: 14,
+                  decoration: BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: terakhir ? cs.primary : cs.surface,
+                    border: Border.all(color: terakhir ? cs.primary : cs.outline, width: 2),
+                  ),
+                ),
+                Expanded(
+                  child: terakhir ? const SizedBox.shrink() : VerticalDivider(width: 2, thickness: 2, color: garis),
+                ),
+              ],
+            ),
+          ),
+          Expanded(
+            child: Padding(
+              padding: const EdgeInsets.only(left: 8, bottom: 18),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    item.keterangan,
+                    style: text.bodyMedium?.copyWith(
+                      fontWeight: terakhir ? FontWeight.w700 : FontWeight.w500,
+                    ),
+                  ),
+                  if (item.tanggal != null)
+                    Padding(
+                      padding: const EdgeInsets.only(top: 2),
+                      child: Text(
+                        item.adaJam ? formatTanggalWaktu(item.tanggal!) : formatTanggal(item.tanggal!),
+                        style: text.bodySmall?.copyWith(color: cs.onSurfaceVariant),
+                      ),
+                    ),
+                ],
+              ),
+            ),
+          ),
+        ],
       ),
     );
   }

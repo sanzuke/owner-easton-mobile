@@ -54,16 +54,26 @@ class TiketBerkas {
       );
 }
 
+/// Satu peristiwa riwayat tiket. API mengirim `keterangan` berawalan tanggal ("2026-08-15 Request Date")
+/// dan `tanggal` kadang hanya tanggal tanpa jam; awalan dibuang, jam hanya ditampilkan bila ada.
 class TiketTimeline {
   final String keterangan;
   final DateTime? tanggal;
+  final bool adaJam;
 
-  const TiketTimeline({required this.keterangan, this.tanggal});
+  const TiketTimeline({required this.keterangan, this.tanggal, this.adaJam = false});
 
-  factory TiketTimeline.fromJson(Map<String, dynamic> json) => TiketTimeline(
-        keterangan: json['keterangan']?.toString() ?? '-',
-        tanggal: DateTime.tryParse(json['tanggal']?.toString() ?? ''),
-      );
+  static final _awalanTanggal = RegExp(r'^\d{4}-\d{2}-\d{2}(\s+\d{2}:\d{2}(:\d{2})?)?\s+');
+
+  factory TiketTimeline.fromJson(Map<String, dynamic> json) {
+    final mentah = json['tanggal']?.toString() ?? '';
+    final ket = (json['keterangan']?.toString() ?? '').replaceFirst(_awalanTanggal, '').trim();
+    return TiketTimeline(
+      keterangan: ket.isEmpty ? '-' : ket,
+      tanggal: DateTime.tryParse(mentah),
+      adaJam: mentah.contains(':'),
+    );
+  }
 }
 
 /// `GET /tiket/{id}` — tidak membawa nama tipe; layar detail memakai tipe dari daftar.

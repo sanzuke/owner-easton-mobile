@@ -11,6 +11,11 @@ String formatTanggal(DateTime date) {
   return DateFormat('d MMM y', 'id_ID').format(date);
 }
 
+/// Tanggal + jam "21 Agu 2026, 09:00".
+String formatTanggalWaktu(DateTime date) {
+  return DateFormat('d MMM y, HH:mm', 'id_ID').format(date);
+}
+
 /// Format tanggal panjang "10 Agustus 2026".
 String formatTanggalPanjang(DateTime date) {
   return DateFormat('d MMMM y', 'id_ID').format(date);
