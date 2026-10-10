@@ -9,6 +9,7 @@ import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
 import '../../profil/presentation/profil_screen.dart';
 import '../../tiket/presentation/request_screen.dart';
+import '../../utility/presentation/utility_screen.dart';
 import 'pengaturan_screen.dart';
 
 /// Hub menu lainnya — Request(tiket), Utility, PBB, P3SRS, Pengaturan,
@@ -75,7 +76,7 @@ class LainnyaScreen extends ConsumerWidget {
                 subtitle: 'Pemakaian air',
                 onTap: () => Navigator.of(context).push(
                   MaterialPageRoute(
-                    builder: (_) => const ComingSoonScreen(title: 'Utility'),
+                    builder: (_) => const UtilityScreen(),
                   ),
                 ),
               ),
