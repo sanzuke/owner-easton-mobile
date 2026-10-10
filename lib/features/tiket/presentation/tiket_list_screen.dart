@@ -62,7 +62,7 @@ class TiketListScreen extends ConsumerWidget {
                   child: ListTile(
                     title: Text(tiket.keterangan, maxLines: 2, overflow: TextOverflow.ellipsis),
                     subtitle: Text('${tiket.noForm} · ${tiket.tipe}'),
-                    trailing: Chip(label: Text(tiket.status)),
+                    trailing: _StatusChip(status: tiket.status),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => TiketDetailScreen(tiket: tiket),
@@ -75,6 +75,25 @@ class TiketListScreen extends ConsumerWidget {
           },
         ),
       ),
+    );
+  }
+}
+
+/// Chip status tiket. "Ditutup" memakai warna kontras (inverse) supaya tidak menyatu dengan card;
+/// status lain memakai chip bawaan.
+class _StatusChip extends StatelessWidget {
+  const _StatusChip({required this.status});
+
+  final String status;
+
+  @override
+  Widget build(BuildContext context) {
+    if (status != 'Ditutup') return Chip(label: Text(status));
+    final cs = Theme.of(context).colorScheme;
+    return Chip(
+      label: Text(status, style: TextStyle(color: cs.onInverseSurface, fontWeight: FontWeight.w700)),
+      backgroundColor: cs.inverseSurface,
+      side: BorderSide.none,
     );
   }
 }
