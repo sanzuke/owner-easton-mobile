@@ -2,32 +2,32 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../application/tiket_providers.dart';
+import '../data/tiket_repository.dart';
 import 'tiket_detail_screen.dart';
 import 'tiket_create_screen.dart';
 
 /// Daftar tiket + tombol ajukan tiket baru — Tier 1 (lihat docs/96 §4).
-/// Dipanggil dari grid kategori [RequestScreen] dengan [filterTipe] untuk
-/// menampilkan tiket 1 tipe saja (persis alur desain resmi); tanpa filter,
+/// Dipanggil dari grid kategori [RequestScreen] dengan [tipe] untuk
+/// menampilkan tiket 1 tipe saja (persis alur desain resmi); tanpa tipe,
 /// menampilkan semua tiket.
 class TiketListScreen extends ConsumerWidget {
-  const TiketListScreen({super.key, this.filterTipe, this.filterLabel});
+  const TiketListScreen({super.key, this.tipe});
 
-  final String? filterTipe;
-  final String? filterLabel;
+  final TiketTipe? tipe;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     final listAsync = ref.watch(tiketListProvider);
     final filtered = listAsync.whenData(
-      (list) => filterTipe == null ? list : list.where((t) => t.tipe == filterTipe).toList(),
+      (list) => tipe == null ? list : list.where((t) => t.tipe == tipe!.nama).toList(),
     );
 
     return Scaffold(
-      appBar: AppBar(title: Text(filterLabel ?? 'Tiket')),
+      appBar: AppBar(title: Text(tipe?.nama ?? 'Tiket')),
       floatingActionButton: FloatingActionButton.extended(
         onPressed: () async {
           final created = await Navigator.of(context).push<bool>(
-            MaterialPageRoute(builder: (_) => const TiketCreateScreen()),
+            MaterialPageRoute(builder: (_) => TiketCreateScreen(tipeAwal: tipe?.id)),
           );
           if (created == true) {
             ref.invalidate(tiketListProvider);
@@ -60,12 +60,12 @@ class TiketListScreen extends ConsumerWidget {
                 final tiket = list[index];
                 return Card(
                   child: ListTile(
-                    title: Text(tiket.judul),
-                    subtitle: Text(tiket.tipe),
+                    title: Text(tiket.keterangan, maxLines: 2, overflow: TextOverflow.ellipsis),
+                    subtitle: Text('${tiket.noForm} · ${tiket.tipe}'),
                     trailing: Chip(label: Text(tiket.status)),
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
-                        builder: (_) => TiketDetailScreen(id: tiket.id),
+                        builder: (_) => TiketDetailScreen(tiket: tiket),
                       ),
                     ),
                   ),

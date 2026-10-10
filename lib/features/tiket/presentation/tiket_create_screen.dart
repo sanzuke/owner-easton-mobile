@@ -7,7 +7,10 @@ import '../application/tiket_providers.dart';
 /// Ajukan tiket baru — form dinamis lintas tipe (Defect/FO/General/WO/
 /// Access/Corrective), lihat docs/96 §4 & update 19 Agustus.
 class TiketCreateScreen extends ConsumerStatefulWidget {
-  const TiketCreateScreen({super.key});
+  const TiketCreateScreen({super.key, this.tipeAwal});
+
+  /// Id tipe yang dipilih sebelumnya (dari kategori Request); null = pilih manual.
+  final String? tipeAwal;
 
   @override
   ConsumerState<TiketCreateScreen> createState() => _TiketCreateScreenState();
@@ -15,14 +18,12 @@ class TiketCreateScreen extends ConsumerStatefulWidget {
 
 class _TiketCreateScreenState extends ConsumerState<TiketCreateScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _judulController = TextEditingController();
   final _keteranganController = TextEditingController();
-  String? _selectedTipe;
+  late String? _selectedTipe = widget.tipeAwal;
   bool _submitting = false;
 
   @override
   void dispose() {
-    _judulController.dispose();
     _keteranganController.dispose();
     super.dispose();
   }
@@ -38,7 +39,6 @@ class _TiketCreateScreenState extends ConsumerState<TiketCreateScreen> {
     try {
       await ref.read(tiketRepositoryProvider).create(
             tipe: _selectedTipe!,
-            judul: _judulController.text.trim(),
             keterangan: _keteranganController.text.trim(),
           );
       if (mounted) Navigator.of(context).pop(true);
@@ -70,22 +70,17 @@ class _TiketCreateScreenState extends ConsumerState<TiketCreateScreen> {
                   initialValue: _selectedTipe,
                   decoration: const InputDecoration(labelText: 'Tipe Tiket'),
                   items: tipeList
-                      .map((t) => DropdownMenuItem(value: t.kode, child: Text(t.nama)))
+                      .map((t) => DropdownMenuItem(value: t.id, child: Text(t.nama)))
                       .toList(),
                   onChanged: (v) => setState(() => _selectedTipe = v),
                 ),
               ),
               const SizedBox(height: 16),
               TextFormField(
-                controller: _judulController,
-                decoration: const InputDecoration(labelText: 'Judul'),
-                validator: (v) => (v == null || v.trim().isEmpty) ? 'Judul wajib diisi' : null,
-              ),
-              const SizedBox(height: 16),
-              TextFormField(
                 controller: _keteranganController,
                 decoration: const InputDecoration(labelText: 'Keterangan'),
                 maxLines: 4,
+                maxLength: 1000,
                 validator: (v) =>
                     (v == null || v.trim().isEmpty) ? 'Keterangan wajib diisi' : null,
               ),
