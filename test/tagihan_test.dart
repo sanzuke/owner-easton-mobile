@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:owner_easton_mobile/core/theme/app_theme.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -125,17 +126,25 @@ class _RepoTagihanPalsu implements TagihanRepository {
 }
 
 void tagihanTerakhirTest() {
-  testWidgets('kartu Tagihan Terakhir diketuk membuka detail invoice itu', (
+  testWidgets('kartu Tagihan Terakhir tetap bisa diketuk setelah pindah ELECTRICITY lalu INVOICE (tema asli)', (
     tester,
   ) async {
+    // Tema asli penting: ia memberi FilledButton minimumSize lebar tak hingga; tombol di dalam Row tanpa
+    // override merusak layout seluruh daftar (data hilang, tidak bisa diketuk).
     await tester.pumpWidget(
       ProviderScope(
         overrides: [
           tagihanRepositoryProvider.overrideWithValue(_RepoTagihanPalsu()),
         ],
-        child: const MaterialApp(home: TagihanListScreen()),
+        child: MaterialApp(theme: AppTheme.light(), home: const TagihanListScreen()),
       ),
     );
+    await tester.pumpAndSettle();
+    expect(find.text('INV/9 · 2026-07-01'), findsOneWidget);
+
+    await tester.tap(find.text('ELECTRICITY'));
+    await tester.pumpAndSettle();
+    await tester.tap(find.text('INVOICE'));
     await tester.pumpAndSettle();
 
     await tester.tap(find.text('Tagihan Terakhir'));

@@ -224,6 +224,8 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                       FilledButton.icon(
                                         style: FilledButton.styleFrom(
                                           backgroundColor: AppColors.brandGold,
+                                          // Tema memberi minimumSize lebar tak hingga; di dalam Row itu merusak layout.
+                                          minimumSize: const Size(0, 40),
                                         ),
                                         onPressed: () =>
                                             Navigator.of(context).push(
