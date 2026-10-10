@@ -409,10 +409,12 @@ class _AcaraBanner extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final now = DateTime.now();
     final acara = ref
         .watch(acaraListProvider)
         .valueOrNull
-        ?.where((a) => a.butuhKonfirmasi && !a.sudahKonfirmasi)
+        ?.aktif
+        .where((a) => !a.sudahRsvp && (a.batasRsvp == null || a.batasRsvp!.isAfter(now)))
         .firstOrNull;
     if (acara == null) return const SizedBox.shrink();
 
@@ -437,16 +439,16 @@ class _AcaraBanner extends ConsumerWidget {
               ],
             ),
             const SizedBox(height: 6),
-            Text(acara.judul, style: TextStyle(color: p.ink, fontSize: 15, fontWeight: FontWeight.w800)),
-            if (acara.tanggal != null)
+            Text(acara.nama, style: TextStyle(color: p.ink, fontSize: 15, fontWeight: FontWeight.w800)),
+            if (acara.tglMulai != null)
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Text(formatTanggalPanjang(acara.tanggal!), style: TextStyle(color: p.inkSoft, fontSize: 12.5)),
+                child: Text(formatTanggalPanjang(acara.tglMulai!), style: TextStyle(color: p.inkSoft, fontSize: 12.5)),
               ),
-            if (acara.batasKonfirmasi != null)
+            if (acara.batasRsvp != null)
               Padding(
                 padding: const EdgeInsets.only(top: 2),
-                child: Text('Batas konfirmasi: ${formatTanggal(acara.batasKonfirmasi!)}',
+                child: Text('Batas konfirmasi: ${formatTanggal(acara.batasRsvp!)}',
                     style: TextStyle(color: p.warnText, fontSize: 12.5, fontWeight: FontWeight.w700)),
               ),
             const SizedBox(height: 10),
