@@ -88,3 +88,11 @@ mengedit `pubspec.yaml` tiap build. Nama versi (`1.0.0`) tetap dari `version:` d
 
 `flutter run` tidak melewati skrip ini dan memakai angka build dari `pubspec.yaml`; untuk mencoba di
 perangkat cukup begitu. Pakai skrip ini untuk APK/AAB yang dibagikan atau diunggah.
+
+## Versi aplikasi
+
+- **Nama versi** (`MAJOR.MINOR.PATCH`) = bagian sebelum `+` pada `version:` di `pubspec.yaml`, dinaikkan manual per rilis
+  (fitur baru → MINOR, perbaikan saja → PATCH). Saat ini `1.1.0`.
+- **Nomor build** = bagian setelah `+`; untuk APK/AAB yang dibagikan diganti otomatis oleh `scripts/build.*` (lihat di atas).
+- Versi terpasang tampil di aplikasi: **Lainnya → Pengaturan → Versi aplikasi** (mis. `1.1.0 (build 12345)`),
+  dibaca lewat `package_info_plus` (`lib/core/providers/app_info_provider.dart`).
