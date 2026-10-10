@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/status_badge.dart';
 import '../application/tagihan_providers.dart';
 import '../data/tagihan_repository.dart';
 
@@ -38,7 +39,7 @@ class TagihanDetailScreen extends ConsumerWidget {
                     ),
                     Text(detail.periode ?? '-'),
                     const SizedBox(height: 8),
-                    Text('Status: ${detail.status}'),
+                    StatusBadge(status: detail.status),
                   ],
                 ),
               ),

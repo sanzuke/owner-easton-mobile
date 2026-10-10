@@ -108,6 +108,20 @@ void main() {
     expect(find.text('Riwayat Pembayaran'), findsNothing);
     expect(find.text('Print'), findsNothing);
   });
+
+  testWidgets('status detail tampil sebagai badge berwarna: Lunas hijau, Belum lunas merah muda', (
+    tester,
+  ) async {
+    Color warna(String teks) => tester.widget<Text>(find.text(teks)).style!.color!;
+
+    await pasang(tester, TagihanDetail.fromJson(_json(), '1')); // tagihan 1.219.500 dibayar penuh
+    expect(warna('LUNAS'), AppColors.paymentBadgeFg);
+
+    final belum = _json()..['items'] = [(_json()['items'] as List).first];
+    await tester.pumpWidget(const SizedBox()); // paksa layar dibangun ulang
+    await pasang(tester, TagihanDetail.fromJson(belum, '1'));
+    expect(warna('BELUM LUNAS'), AppColors.invoiceBadgeFg);
+  });
 }
 
 class _RepoTagihanPalsu implements TagihanRepository {
