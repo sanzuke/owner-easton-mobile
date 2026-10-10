@@ -89,12 +89,12 @@ class TiketListScreen extends ConsumerWidget {
                                           tiket.keterangan,
                                           maxLines: 2,
                                           overflow: TextOverflow.ellipsis,
-                                          style: Theme.of(context).textTheme.titleSmall,
+                                          style: Theme.of(context).textTheme.bodyLarge,
                                         ),
                                         const SizedBox(height: 4),
                                         Text(
                                           '${tiket.noForm} · ${tiket.tipe}',
-                                          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                          style: Theme.of(context).textTheme.bodyMedium?.copyWith(
                                                 color: Theme.of(context).colorScheme.onSurfaceVariant,
                                               ),
                                         ),
