@@ -3,10 +3,10 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 
 import '../../../core/theme/app_colors.dart';
-import '../../../core/widgets/coming_soon_screen.dart';
 import '../../../core/widgets/menu_icon_card.dart';
 import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../p3srs/presentation/p3srs_screen.dart';
 import '../../pbb/presentation/pbb_screen.dart';
 import '../../profil/presentation/profil_screen.dart';
 import '../../tiket/presentation/request_screen.dart';
@@ -96,7 +96,7 @@ class LainnyaScreen extends ConsumerWidget {
                 title: 'P3SRS',
                 subtitle: 'Dokumen perhimpunan',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ComingSoonScreen(title: 'P3SRS')),
+                  MaterialPageRoute(builder: (_) => const P3srsScreen()),
                 ),
               ),
               MenuIconCard(
