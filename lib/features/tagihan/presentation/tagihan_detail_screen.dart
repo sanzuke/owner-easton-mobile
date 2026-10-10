@@ -37,7 +37,7 @@ class TagihanDetailScreen extends ConsumerWidget {
                       detail.nomorInvoice ?? detail.id,
                       style: Theme.of(context).textTheme.titleMedium,
                     ),
-                    Text(detail.periode ?? '-'),
+                    Text(formatTanggalIso(detail.periode)),
                     const SizedBox(height: 8),
                     StatusBadge(status: detail.status),
                   ],

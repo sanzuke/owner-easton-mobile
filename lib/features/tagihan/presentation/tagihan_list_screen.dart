@@ -164,7 +164,7 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                         ),
                                         const SizedBox(height: 2),
                                         Text(
-                                          '${terakhir.nomorInvoice ?? terakhir.id} · ${terakhir.periode ?? '-'}',
+                                          '${terakhir.nomorInvoice ?? terakhir.id} · ${formatTanggalIso(terakhir.periode)}',
                                           style: Theme.of(context).textTheme.bodySmall,
                                         ),
                                       ],
@@ -202,7 +202,7 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                     ],
                                   ),
                                   Text(
-                                    tagihan.periode ?? '-',
+                                    formatTanggalIso(tagihan.periode),
                                     style: Theme.of(
                                       context,
                                     ).textTheme.bodySmall,

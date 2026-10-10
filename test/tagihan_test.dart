@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:owner_easton_mobile/core/theme/app_colors.dart';
+import 'package:owner_easton_mobile/core/utils/formatters.dart';
 import 'package:owner_easton_mobile/core/theme/app_theme.dart';
 import 'package:owner_easton_mobile/core/widgets/status_badge.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -55,6 +56,15 @@ void main() {
   setUpAll(() => initializeDateFormatting('id_ID'));
   tagihanTerakhirTest();
   statusBadgeTest();
+
+  test('tanggal tampil DD MMM YYYY (hari 2 digit); kosong jadi "-", teks non-tanggal apa adanya', () {
+    expect(formatTanggalIso('2026-07-05'), '05 Jul 2026');
+    expect(formatTanggalIso('2026-10-21 09:00:00'), '21 Okt 2026');
+    expect(formatTanggalIso(null), '-');
+    expect(formatTanggalIso(''), '-');
+    expect(formatTanggalIso('segera'), 'segera');
+    expect(formatTanggal(DateTime(2026, 3, 1)), '01 Mar 2026');
+  });
 
   test(
     'TagihanDetail membaca pembayaran; server lama tanpa field pembayaran tetap terbaca',
@@ -157,7 +167,7 @@ void tagihanTerakhirTest() {
       ),
     );
     await tester.pumpAndSettle();
-    expect(find.text('INV/9 · 2026-07-01'), findsOneWidget);
+    expect(find.text('INV/9 · 01 Jul 2026'), findsOneWidget);
 
     await tester.tap(find.text('ELECTRICITY'));
     await tester.pumpAndSettle();

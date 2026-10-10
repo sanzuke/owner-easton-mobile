@@ -140,7 +140,7 @@ void main() {
 
     await pasangKosong(tester, periode: Periode(DateTime(2026, 3, 1), DateTime(2026, 3, 31)));
     expect(find.text('Tidak ada pembayaran pada periode ini.'), findsOneWidget);
-    expect(find.text('1 Mar 2026 – 31 Mar 2026'), findsOneWidget);
+    expect(find.text('01 Mar 2026 – 31 Mar 2026'), findsOneWidget);
   });
 }
 
