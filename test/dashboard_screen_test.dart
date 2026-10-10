@@ -5,6 +5,7 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'package:owner_easton_mobile/core/theme/app_theme.dart';
 import 'package:owner_easton_mobile/core/theme/tampilan.dart';
 import 'package:owner_easton_mobile/features/acara/application/acara_providers.dart';
+import 'package:owner_easton_mobile/features/acara/data/acara_repository.dart';
 import 'package:owner_easton_mobile/features/dashboard/application/dashboard_providers.dart';
 import 'package:owner_easton_mobile/features/dashboard/application/tampilan_providers.dart';
 import 'package:owner_easton_mobile/features/dashboard/data/dashboard_repository.dart';
@@ -39,7 +40,7 @@ Future<void> _pasang(WidgetTester tester, DashboardSummary s, {TampilanPilihan p
         dashboardSummaryProvider.overrideWith((ref) async => s),
         tampilanPilihanProvider.overrideWith(() => _PilihanTetap(pilihan)),
         sekarangProvider.overrideWithValue(DateTime(2026, 10, 8, 9)),
-        acaraListProvider.overrideWith((ref) async => []),
+        acaraListProvider.overrideWith((ref) async => const DaftarAcara()),
         notifikasiBelumDibacaProvider.overrideWith((ref) async => 2),
       ],
       child: MaterialApp(theme: AppTheme.light(), home: const Scaffold(body: DashboardScreen())),
