@@ -17,11 +17,13 @@ class TampilanScreen extends ConsumerStatefulWidget {
 
 class _TampilanScreenState extends ConsumerState<TampilanScreen> {
   TampilanPilihan? _dipilih;
+  TemaPilihan? _tema;
   bool _menyimpan = false;
 
-  Future<void> _simpan(TampilanPilihan pilihan) async {
+  Future<void> _simpan(TampilanPilihan pilihan, TemaPilihan tema) async {
     setState(() => _menyimpan = true);
     await ref.read(tampilanPilihanProvider.notifier).simpan(pilihan);
+    await ref.read(temaPilihanProvider.notifier).simpan(tema);
     if (!mounted) return;
     setState(() => _menyimpan = false);
     ScaffoldMessenger.of(context).showSnackBar(const SnackBar(content: Text('Pengaturan tampilan disimpan.')));
@@ -32,6 +34,8 @@ class _TampilanScreenState extends ConsumerState<TampilanScreen> {
   Widget build(BuildContext context) {
     final tersimpan = ref.watch(tampilanPilihanProvider).valueOrNull ?? TampilanPilihan.otomatis;
     final pilihan = _dipilih ?? tersimpan;
+    final temaTersimpan = ref.watch(temaPilihanProvider).valueOrNull ?? TemaPilihan.sistem;
+    final tema = _tema ?? temaTersimpan;
     final lahir = ref.watch(dashboardSummaryProvider).valueOrNull?.tanggalLahir;
     final sekarang = ref.watch(sekarangProvider);
     final usia = hitungUsia(lahir, sekarang);
@@ -55,10 +59,39 @@ class _TampilanScreenState extends ConsumerState<TampilanScreen> {
           Text('Tampilan Aplikasi', style: TextStyle(color: p.ink, fontSize: 22, fontWeight: FontWeight.w800)),
           const SizedBox(height: 8),
           Text(
+            'Tema warna berlaku untuk seluruh aplikasi.',
+            style: TextStyle(color: p.inkSoft, fontSize: 15, height: 1.5),
+          ),
+          const SizedBox(height: 16),
+          _Opsi(
+            p: p,
+            terpilih: tema == TemaPilihan.sistem,
+            judul: 'Ikuti HP',
+            deskripsi: 'Terang atau gelap mengikuti pengaturan HP.',
+            onTap: () => setState(() => _tema = TemaPilihan.sistem),
+          ),
+          _Opsi(
+            p: p,
+            terpilih: tema == TemaPilihan.terang,
+            judul: 'Terang',
+            deskripsi: 'Latar terang, nyaman dibaca di tempat terang.',
+            onTap: () => setState(() => _tema = TemaPilihan.terang),
+          ),
+          _Opsi(
+            p: p,
+            terpilih: tema == TemaPilihan.gelap,
+            judul: 'Gelap',
+            deskripsi: 'Latar gelap, lebih hemat mata dan baterai di tempat redup.',
+            onTap: () => setState(() => _tema = TemaPilihan.gelap),
+          ),
+          const SizedBox(height: 18),
+          Text('Gaya Tampilan', style: TextStyle(color: p.ink, fontSize: 19, fontWeight: FontWeight.w800)),
+          const SizedBox(height: 8),
+          Text(
             'Pilih gaya tampilan yang paling nyaman untuk Bapak/Ibu gunakan sehari-hari.',
             style: TextStyle(color: p.inkSoft, fontSize: 15, height: 1.5),
           ),
-          const SizedBox(height: 22),
+          const SizedBox(height: 16),
           _Opsi(
             p: p,
             terpilih: pilihan == TampilanPilihan.otomatis,
@@ -109,7 +142,7 @@ class _TampilanScreenState extends ConsumerState<TampilanScreen> {
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(100)),
                 textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
               ),
-              onPressed: _menyimpan ? null : () => _simpan(pilihan),
+              onPressed: _menyimpan ? null : () => _simpan(pilihan, tema),
               child: const Text('Simpan Pengaturan'),
             ),
           ),

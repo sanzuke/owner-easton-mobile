@@ -32,8 +32,9 @@ class DashboardScreen extends ConsumerWidget {
     final mode = ref.watch(tampilanModeProvider);
     final p = DashPalette.untuk(mode, Theme.of(context).brightness);
 
+    final terang = Theme.of(context).brightness == Brightness.light;
     return AnnotatedRegion<SystemUiOverlayStyle>(
-      value: p.modern ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
+      value: (p.modern && !terang) ? SystemUiOverlayStyle.light : SystemUiOverlayStyle.dark,
       child: ColoredBox(
         color: p.bg,
         child: RefreshIndicator(

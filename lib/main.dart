@@ -6,6 +6,8 @@ import 'package:intl/date_symbol_data_local.dart';
 import 'app/app_router.dart';
 import 'core/constants/app_constants.dart';
 import 'core/theme/app_theme.dart';
+import 'core/theme/tampilan.dart';
+import 'features/dashboard/application/tampilan_providers.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -20,16 +22,18 @@ Future<void> main() async {
   runApp(const ProviderScope(child: OwnerEastonApp()));
 }
 
-class OwnerEastonApp extends StatelessWidget {
+class OwnerEastonApp extends ConsumerWidget {
   const OwnerEastonApp({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
+    final tema = ref.watch(temaPilihanProvider).valueOrNull ?? TemaPilihan.sistem;
     return MaterialApp.router(
       title: AppConstants.appName,
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
       darkTheme: AppTheme.dark(),
+      themeMode: tema.mode,
       routerConfig: appRouter,
     );
   }

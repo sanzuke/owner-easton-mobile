@@ -27,7 +27,7 @@ class AppShell extends ConsumerWidget {
   Widget build(BuildContext context, WidgetRef ref) {
     final index = ref.watch(shellTabProvider);
     final modern = index == 0 && ref.watch(tampilanModeProvider) == TampilanMode.modern;
-    const p = DashPalette.modernGelap;
+    final p = DashPalette.untuk(TampilanMode.modern, Theme.of(context).brightness);
 
     final bar = NavigationBar(
       selectedIndex: index,

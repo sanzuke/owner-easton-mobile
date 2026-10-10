@@ -1,3 +1,5 @@
+import 'package:flutter/material.dart' show Brightness, ThemeMode;
+import 'package:owner_easton_mobile/features/dashboard/presentation/dash_palette.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:owner_easton_mobile/core/theme/tampilan.dart';
 
@@ -30,6 +32,23 @@ void main() {
       expect(TampilanPilihan.dari('modern'), TampilanPilihan.modern);
       expect(TampilanPilihan.dari('aneh'), TampilanPilihan.otomatis);
       expect(TampilanPilihan.dari(null), TampilanPilihan.otomatis);
+    });
+  });
+
+  group('tema warna', () {
+    test('pilihan dipetakan ke ThemeMode; nilai rusak/kosong ikut HP', () {
+      expect(TemaPilihan.dari('gelap').mode, ThemeMode.dark);
+      expect(TemaPilihan.dari('terang').mode, ThemeMode.light);
+      expect(TemaPilihan.dari('sistem').mode, ThemeMode.system);
+      expect(TemaPilihan.dari('aneh'), TemaPilihan.sistem);
+      expect(TemaPilihan.dari(null), TemaPilihan.sistem);
+    });
+
+    test('semua gaya mengikuti kecerahan; Modern tidak lagi dipaksa gelap', () {
+      expect(DashPalette.untuk(TampilanMode.modern, Brightness.light), DashPalette.modernTerang);
+      expect(DashPalette.untuk(TampilanMode.modern, Brightness.dark), DashPalette.modernGelap);
+      expect(DashPalette.untuk(TampilanMode.nyaman, Brightness.light), DashPalette.nyamanTerang);
+      expect(DashPalette.untuk(TampilanMode.nyaman, Brightness.dark), DashPalette.nyamanGelap);
     });
   });
 
