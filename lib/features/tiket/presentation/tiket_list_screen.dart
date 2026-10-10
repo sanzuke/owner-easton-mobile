@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
+import '../../../core/theme/tampilan.dart';
+import '../../dashboard/presentation/dash_palette.dart';
 import '../application/tiket_providers.dart';
 import '../data/tiket_repository.dart';
 import 'tiket_detail_screen.dart';
@@ -59,13 +61,41 @@ class TiketListScreen extends ConsumerWidget {
               itemBuilder: (context, index) {
                 final tiket = list[index];
                 return Card(
-                  child: ListTile(
-                    title: Text(tiket.keterangan, maxLines: 2, overflow: TextOverflow.ellipsis),
-                    subtitle: Text('${tiket.noForm} · ${tiket.tipe}'),
-                    trailing: _StatusChip(status: tiket.status),
+                  clipBehavior: Clip.antiAlias,
+                  child: InkWell(
                     onTap: () => Navigator.of(context).push(
                       MaterialPageRoute(
                         builder: (_) => TiketDetailScreen(tiket: tiket),
+                      ),
+                    ),
+                    child: Padding(
+                      padding: const EdgeInsets.fromLTRB(16, 12, 12, 12),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  tiket.keterangan,
+                                  maxLines: 2,
+                                  overflow: TextOverflow.ellipsis,
+                                  style: Theme.of(context).textTheme.titleSmall,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  '${tiket.noForm} · ${tiket.tipe}',
+                                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                                        color: Theme.of(context).colorScheme.onSurfaceVariant,
+                                      ),
+                                ),
+                              ],
+                            ),
+                          ),
+                          const SizedBox(width: 8),
+                          _StatusBadge(status: tiket.status),
+                        ],
                       ),
                     ),
                   ),
@@ -79,21 +109,33 @@ class TiketListScreen extends ConsumerWidget {
   }
 }
 
-/// Chip status tiket. "Ditutup" memakai warna kontras (inverse) supaya tidak menyatu dengan card;
-/// status lain memakai chip bawaan.
-class _StatusChip extends StatelessWidget {
-  const _StatusChip({required this.status});
+/// Badge status tiket di kanan atas card. "Ditutup" hijau seperti badge lunas di Beranda;
+/// status lain netral.
+class _StatusBadge extends StatelessWidget {
+  const _StatusBadge({required this.status});
 
   final String status;
 
   @override
   Widget build(BuildContext context) {
-    if (status != 'Ditutup') return Chip(label: Text(status));
-    final cs = Theme.of(context).colorScheme;
-    return Chip(
-      label: Text(status, style: TextStyle(color: cs.onInverseSurface, fontWeight: FontWeight.w700)),
-      backgroundColor: cs.inverseSurface,
-      side: BorderSide.none,
+    final theme = Theme.of(context);
+    final cs = theme.colorScheme;
+    final p = DashPalette.untuk(TampilanMode.nyaman, theme.brightness);
+    final hijau = status == 'Ditutup';
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 9, vertical: 3),
+      decoration: BoxDecoration(
+        color: hijau ? p.okBg : cs.surfaceContainerHigh,
+        borderRadius: BorderRadius.circular(100),
+      ),
+      child: Text(
+        status,
+        style: TextStyle(
+          color: hijau ? p.okText : cs.onSurfaceVariant,
+          fontSize: 11,
+          fontWeight: FontWeight.w700,
+        ),
+      ),
     );
   }
 }
