@@ -44,4 +44,13 @@ void main() {
     expect(d.timeline.single.tanggal, DateTime(2026, 8, 15, 9));
     expect(d.berkas.single.nama, 'Foto AC');
   });
+
+  test('timeline: awalan tanggal dibuang, jam hanya bila ada', () {
+    final a = TiketTimeline.fromJson({'tanggal': '2026-08-15', 'keterangan': '2026-08-15 Request Date'});
+    expect(a.keterangan, 'Request Date');
+    expect(a.adaJam, isFalse);
+    final b = TiketTimeline.fromJson({'tanggal': '2026-08-15 09:30:00', 'keterangan': '2026-08-15 09:30:00 Ditugaskan'});
+    expect(b.keterangan, 'Ditugaskan');
+    expect(b.adaJam, isTrue);
+  });
 }
