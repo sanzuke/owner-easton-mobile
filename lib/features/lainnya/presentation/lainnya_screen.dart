@@ -7,6 +7,7 @@ import '../../../core/widgets/coming_soon_screen.dart';
 import '../../../core/widgets/menu_icon_card.dart';
 import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../auth/application/auth_providers.dart';
+import '../../pbb/presentation/pbb_screen.dart';
 import '../../profil/presentation/profil_screen.dart';
 import '../../tiket/presentation/request_screen.dart';
 import '../../utility/presentation/utility_screen.dart';
@@ -86,7 +87,7 @@ class LainnyaScreen extends ConsumerWidget {
                 title: 'PBB',
                 subtitle: 'Pajak bumi bangunan',
                 onTap: () => Navigator.of(context).push(
-                  MaterialPageRoute(builder: (_) => const ComingSoonScreen(title: 'PBB')),
+                  MaterialPageRoute(builder: (_) => const PbbScreen()),
                 ),
               ),
               MenuIconCard(
