@@ -12,8 +12,13 @@ import '../../dashboard/presentation/dash_palette.dart';
 import '../application/pbb_providers.dart';
 import '../data/pbb_repository.dart';
 
-/// Tema app memberi tombol lebar penuh (`Size.fromHeight`); di dalam Row itu jadi lebar tak hingga.
-const _gayaTombolBaris = ButtonStyle(minimumSize: WidgetStatePropertyAll(Size(0, 40)));
+/// Tombol dalam Row kartu: tema app memberi tombol lebar penuh tinggi 52 dan font 16, yang di sini
+/// terlalu besar (dan jadi lebar tak hingga di dalam Row), jadi dikecilkan.
+const _gayaTombolBaris = ButtonStyle(
+  minimumSize: WidgetStatePropertyAll(Size(0, 36)),
+  padding: WidgetStatePropertyAll(EdgeInsets.symmetric(horizontal: 14)),
+  textStyle: WidgetStatePropertyAll(TextStyle(fontSize: 13, fontWeight: FontWeight.w600)),
+);
 
 /// Pajak Bumi dan Bangunan: NOP, tagihan per tahun, SPPT (PDF dari admin) dan bukti bayar yang
 /// diunggah owner. Setara halaman PBB di portal web owner (`GET /pbb`, docs/96b §9c).
