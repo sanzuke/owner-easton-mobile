@@ -11,6 +11,8 @@ class StatusBadge extends StatelessWidget {
 
   bool get _isPaid {
     final s = status.toLowerCase();
+    // "Belum lunas" / "unpaid" memuat kata lunas/paid tetapi berarti sebaliknya.
+    if (s.contains('belum') || s.contains('unpaid')) return false;
     return s.contains('payment') || s.contains('lunas') || s.contains('paid');
   }
 

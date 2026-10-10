@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:owner_easton_mobile/core/theme/app_colors.dart';
 import 'package:owner_easton_mobile/core/theme/app_theme.dart';
+import 'package:owner_easton_mobile/core/widgets/status_badge.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:flutter_test/flutter_test.dart';
 import 'package:intl/date_symbol_data_local.dart';
@@ -52,6 +54,7 @@ const _cn = {
 void main() {
   setUpAll(() => initializeDateFormatting('id_ID'));
   tagihanTerakhirTest();
+  statusBadgeTest();
 
   test(
     'TagihanDetail membaca pembayaran; server lama tanpa field pembayaran tetap terbaca',
@@ -153,5 +156,18 @@ void tagihanTerakhirTest() {
     expect(find.text('Detail Tagihan'), findsOneWidget);
     expect(find.text('INV/EPR-IPL/3767/VII/2026'), findsOneWidget);
     expect(find.text('Riwayat Pembayaran'), findsOneWidget);
+  });
+}
+
+void statusBadgeTest() {
+  Color warnaTeks(WidgetTester tester, String teks) => tester.widget<Text>(find.text(teks)).style!.color!;
+
+  testWidgets('badge: "Belum lunas" berwarna invoice (bukan hijau), "Lunas" berwarna payment', (tester) async {
+    await tester.pumpWidget(const MaterialApp(
+      home: Column(children: [StatusBadge(status: 'Belum lunas'), StatusBadge(status: 'Lunas')]),
+    ));
+
+    expect(warnaTeks(tester, 'BELUM LUNAS'), AppColors.invoiceBadgeFg);
+    expect(warnaTeks(tester, 'LUNAS'), AppColors.paymentBadgeFg);
   });
 }
