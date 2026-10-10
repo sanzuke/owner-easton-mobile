@@ -11,6 +11,8 @@ import 'package:owner_easton_mobile/features/dashboard/application/tampilan_prov
 import 'package:owner_easton_mobile/features/dashboard/data/dashboard_repository.dart';
 import 'package:owner_easton_mobile/features/dashboard/presentation/dashboard_screen.dart';
 import 'package:owner_easton_mobile/features/notifikasi/application/notifikasi_providers.dart';
+import 'package:owner_easton_mobile/features/p3srs/application/p3srs_providers.dart';
+import 'package:owner_easton_mobile/features/p3srs/data/p3srs_repository.dart';
 
 class _PilihanTetap extends TampilanPilihanNotifier {
   _PilihanTetap(this._nilai);
@@ -29,7 +31,12 @@ DashboardSummary _ringkasan({DateTime? lahir, TagihanTerbaru? tagihan, num piuta
       tagihanTerbaru: tagihan,
     );
 
-Future<void> _pasang(WidgetTester tester, DashboardSummary s, {TampilanPilihan pilihan = TampilanPilihan.otomatis}) async {
+Future<void> _pasang(
+  WidgetTester tester,
+  DashboardSummary s, {
+  TampilanPilihan pilihan = TampilanPilihan.otomatis,
+  List<ArtikelRingkas> berita = const [],
+}) async {
   await initializeDateFormatting('id_ID');
   tester.view.physicalSize = const Size(412, 900);
   tester.view.devicePixelRatio = 1;
@@ -42,6 +49,7 @@ Future<void> _pasang(WidgetTester tester, DashboardSummary s, {TampilanPilihan p
         sekarangProvider.overrideWithValue(DateTime(2026, 10, 8, 9)),
         acaraListProvider.overrideWith((ref) async => const DaftarAcara()),
         notifikasiBelumDibacaProvider.overrideWith((ref) async => 2),
+        beritaTerbaruProvider.overrideWith((ref) async => berita),
       ],
       child: MaterialApp(theme: AppTheme.light(), home: const Scaffold(body: DashboardScreen())),
     ),
@@ -106,4 +114,27 @@ void main() {
 
     expect(find.text('Total belum dibayar seluruh tagihan: Rp3.000.000'), findsOneWidget);
   });
+
+  testWidgets('berita terbaru tampil di beranda lengkap dengan tautan "Lihat semua"', (tester) async {
+    final berita = [
+      ArtikelRingkas(id: 93, judul: 'Upacara HUT ke-81 Kemerdekaan RI', kategori: 'Kegiatan', tanggal: DateTime(2026, 8, 17)),
+      ArtikelRingkas(id: 92, judul: 'Perbaikan Wire Rope Lift', kategori: 'Pengumuman', tanggal: DateTime(2026, 8, 12)),
+    ];
+    await _pasang(tester, _ringkasan(lahir: DateTime(1960, 1, 1), tagihan: belumLunas), berita: berita);
+
+    await tester.scrollUntilVisible(find.text('BERITA TERBARU'), 300, scrollable: find.byType(Scrollable).first);
+    expect(find.text('BERITA TERBARU'), findsOneWidget);
+    expect(find.text('Upacara HUT ke-81 Kemerdekaan RI'), findsOneWidget);
+    expect(find.text('Kegiatan'), findsOneWidget);
+    expect(find.text('17 Agu 2026'), findsOneWidget);
+    expect(find.text('Lihat semua'), findsOneWidget);
+  });
+
+  testWidgets('tanpa berita (kosong): bagian Berita Terbaru tidak muncul', (tester) async {
+    await _pasang(tester, _ringkasan(lahir: DateTime(1960, 1, 1), tagihan: belumLunas));
+
+    expect(find.text('BERITA TERBARU'), findsNothing);
+    expect(find.text('Lihat semua'), findsNothing);
+  });
+
 }

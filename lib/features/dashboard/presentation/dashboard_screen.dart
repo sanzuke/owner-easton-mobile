@@ -12,6 +12,8 @@ import '../../acara/application/acara_providers.dart';
 import '../../acara/presentation/acara_screen.dart';
 import '../../notifikasi/application/notifikasi_providers.dart';
 import '../../notifikasi/presentation/notifikasi_screen.dart';
+import '../../p3srs/application/p3srs_providers.dart';
+import '../../p3srs/presentation/berita_beranda.dart';
 import '../../pembayaran/presentation/pembayaran_screen.dart';
 import '../../tagihan/presentation/tagihan_detail_screen.dart';
 import '../application/dashboard_providers.dart';
@@ -42,6 +44,7 @@ class DashboardScreen extends ConsumerWidget {
             ref.invalidate(dashboardSummaryProvider);
             ref.invalidate(acaraListProvider);
             ref.invalidate(notifikasiBelumDibacaProvider);
+            ref.invalidate(beritaTerbaruProvider);
           },
           child: summaryAsync.when(
             loading: () => ListView(children: [
@@ -77,6 +80,7 @@ class DashboardScreen extends ConsumerWidget {
                       _SectionLabel(p: p),
                       const SizedBox(height: 10),
                       _FeatureGrid(summary: s, p: p),
+                      BeritaBeranda(p: p),
                     ],
                   ),
                 ),

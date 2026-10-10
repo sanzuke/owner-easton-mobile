@@ -112,6 +112,15 @@ class LaporanP3srs {
       );
 }
 
+/// Asal artikel: P3SRS (`/p3srs/artikel`) atau berita situs publik untuk beranda (`/berita`).
+enum SumberArtikel {
+  p3srs('/p3srs/artikel'),
+  berita('/berita');
+
+  const SumberArtikel(this.pathDaftar);
+  final String pathDaftar;
+}
+
 class P3srsRepository {
   P3srsRepository({required ApiClient apiClient}) : _api = apiClient;
 
@@ -127,23 +136,30 @@ class P3srsRepository {
     return res.data ?? const [];
   }
 
-  Future<HalamanArtikel> getArtikel({int? kategori, String? q, int halaman = 1}) async {
+  /// Artikel terbit dari [sumber]; [kategori] hanya bermakna untuk P3SRS.
+  Future<HalamanArtikel> getArtikel({
+    SumberArtikel sumber = SumberArtikel.p3srs,
+    int? kategori,
+    String? q,
+    int halaman = 1,
+    int perHalaman = 10,
+  }) async {
     final res = await _api.get<HalamanArtikel>(
-      '/p3srs/artikel',
+      sumber.pathDaftar,
       query: {
         'kategori': ?kategori,
         if (q != null && q.trim().isNotEmpty) 'q': q.trim(),
         'page': halaman,
-        'per_page': 10,
+        'per_page': perHalaman,
       },
       fromData: (json) => HalamanArtikel.fromJson(json as Map<String, dynamic>),
     );
     return res.data!;
   }
 
-  Future<ArtikelDetail> getDetail(int id) async {
+  Future<ArtikelDetail> getDetail(int id, {SumberArtikel sumber = SumberArtikel.p3srs}) async {
     final res = await _api.get<ArtikelDetail>(
-      '/p3srs/artikel/$id',
+      '${sumber.pathDaftar}/$id',
       fromData: (json) => ArtikelDetail.fromJson(json as Map<String, dynamic>),
     );
     return res.data!;

@@ -11,11 +11,18 @@ final p3srsKategoriProvider = FutureProvider.autoDispose<List<KategoriP3srs>>(
   (ref) => ref.watch(p3srsRepositoryProvider).getKategori(),
 );
 
-final p3srsDetailProvider = FutureProvider.autoDispose.family<ArtikelDetail, int>(
-  (ref, id) => ref.watch(p3srsRepositoryProvider).getDetail(id),
+/// Detail artikel/berita, kunci = (sumber, id).
+final artikelDetailProvider = FutureProvider.autoDispose.family<ArtikelDetail, (SumberArtikel, int)>(
+  (ref, kunci) => ref.watch(p3srsRepositoryProvider).getDetail(kunci.$2, sumber: kunci.$1),
 );
 
 /// Laporan per bulan (`YYYY-MM`).
 final p3srsLaporanProvider = FutureProvider.autoDispose.family<LaporanP3srs, String>(
   (ref, bulan) => ref.watch(p3srsRepositoryProvider).getLaporan(bulan),
 );
+
+/// Berita terbaru situs publik untuk beranda (5 teratas).
+final beritaTerbaruProvider = FutureProvider.autoDispose<List<ArtikelRingkas>>((ref) async {
+  final h = await ref.watch(p3srsRepositoryProvider).getArtikel(sumber: SumberArtikel.berita, perHalaman: 5);
+  return h.items;
+});

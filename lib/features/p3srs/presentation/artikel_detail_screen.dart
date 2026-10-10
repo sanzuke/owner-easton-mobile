@@ -3,17 +3,19 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../application/p3srs_providers.dart';
+import '../data/p3srs_repository.dart';
 import 'html_konten.dart';
 
-/// Detail artikel P3SRS: banner, judul, tanggal, dan isi HTML dari CMS.
+/// Detail artikel P3SRS atau berita: banner, judul, tanggal, dan isi HTML dari CMS.
 class ArtikelDetailScreen extends ConsumerWidget {
-  const ArtikelDetailScreen({super.key, required this.id});
+  const ArtikelDetailScreen({super.key, required this.id, this.sumber = SumberArtikel.p3srs});
 
   final int id;
+  final SumberArtikel sumber;
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
-    final detailAsync = ref.watch(p3srsDetailProvider(id));
+    final detailAsync = ref.watch(artikelDetailProvider((sumber, id)));
     final cs = Theme.of(context).colorScheme;
     final text = Theme.of(context).textTheme;
 
@@ -29,7 +31,7 @@ class ArtikelDetailScreen extends ConsumerWidget {
                 children: [
                   const Text('Artikel belum bisa dimuat. Periksa koneksi lalu coba lagi.', textAlign: TextAlign.center),
                   const SizedBox(height: 12),
-                  FilledButton(onPressed: () => ref.invalidate(p3srsDetailProvider(id)), child: const Text('Coba lagi')),
+                  FilledButton(onPressed: () => ref.invalidate(artikelDetailProvider((sumber, id))), child: const Text('Coba lagi')),
                 ],
               ),
             ),

@@ -45,7 +45,7 @@ void main() {
       'pengunjung': 12,
     });
     await tester.pumpWidget(ProviderScope(
-      overrides: [p3srsDetailProvider(7).overrideWith((ref) async => detail)],
+      overrides: [artikelDetailProvider((SumberArtikel.p3srs, 7)).overrideWith((ref) async => detail)],
       child: const MaterialApp(home: ArtikelDetailScreen(id: 7)),
     ));
     await tester.pumpAndSettle();

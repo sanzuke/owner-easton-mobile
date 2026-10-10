@@ -7,12 +7,13 @@ import '../application/p3srs_providers.dart';
 import '../data/p3srs_repository.dart';
 import 'artikel_detail_screen.dart';
 
-/// Daftar artikel P3SRS (semua atau satu kategori) dengan pencarian dan "Muat lagi" berhalaman.
+/// Daftar artikel P3SRS (semua atau satu kategori) atau berita, dengan pencarian dan "Muat lagi" berhalaman.
 class ArtikelListScreen extends ConsumerStatefulWidget {
-  const ArtikelListScreen({super.key, required this.judul, this.kategori});
+  const ArtikelListScreen({super.key, required this.judul, this.kategori, this.sumber = SumberArtikel.p3srs});
 
   final String judul;
   final KategoriP3srs? kategori;
+  final SumberArtikel sumber;
 
   @override
   ConsumerState<ArtikelListScreen> createState() => _ArtikelListScreenState();
@@ -49,6 +50,7 @@ class _ArtikelListScreenState extends ConsumerState<ArtikelListScreen> {
     final kata = _kataKunci;
     try {
       final h = await ref.read(p3srsRepositoryProvider).getArtikel(
+            sumber: widget.sumber,
             kategori: widget.kategori?.id,
             q: kata,
             halaman: ulang ? 1 : _halaman + 1,
@@ -144,7 +146,7 @@ class _ArtikelListScreenState extends ConsumerState<ArtikelListScreen> {
       itemCount: _items.length + 1,
       separatorBuilder: (context, index) => const SizedBox(height: 8),
       itemBuilder: (context, i) {
-        if (i < _items.length) return _KartuArtikel(artikel: _items[i]);
+        if (i < _items.length) return _KartuArtikel(artikel: _items[i], sumber: widget.sumber);
         if (_memuat) {
           return const Padding(padding: EdgeInsets.all(16), child: Center(child: CircularProgressIndicator()));
         }
@@ -160,9 +162,10 @@ class _ArtikelListScreenState extends ConsumerState<ArtikelListScreen> {
 }
 
 class _KartuArtikel extends StatelessWidget {
-  const _KartuArtikel({required this.artikel});
+  const _KartuArtikel({required this.artikel, required this.sumber});
 
   final ArtikelRingkas artikel;
+  final SumberArtikel sumber;
 
   @override
   Widget build(BuildContext context) {
@@ -177,7 +180,7 @@ class _KartuArtikel extends StatelessWidget {
       clipBehavior: Clip.antiAlias,
       child: InkWell(
         onTap: () => Navigator.of(context).push(
-          MaterialPageRoute(builder: (_) => ArtikelDetailScreen(id: artikel.id)),
+          MaterialPageRoute(builder: (_) => ArtikelDetailScreen(id: artikel.id, sumber: sumber)),
         ),
         child: Padding(
           padding: const EdgeInsets.all(12),
