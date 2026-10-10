@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/filter_periode.dart';
 import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../../../core/widgets/status_badge.dart';
 import '../../pembayaran/presentation/pembayaran_screen.dart';
@@ -22,10 +23,30 @@ class TagihanListScreen extends ConsumerStatefulWidget {
 
 class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
   int _segment = 0;
+  final _scroll = ScrollController();
+
+  @override
+  void initState() {
+    super.initState();
+    _scroll.addListener(() {
+      if (_segment == 0 &&
+          _scroll.hasClients &&
+          _scroll.position.extentAfter < 300) {
+        ref.read(tagihanListProvider.notifier).muatLagi();
+      }
+    });
+  }
+
+  @override
+  void dispose() {
+    _scroll.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
     final listAsync = ref.watch(tagihanListProvider);
+    final periode = ref.watch(periodeTagihanProvider);
 
     return Scaffold(
       appBar: AppBar(
@@ -34,8 +55,9 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
           IconButton(
             tooltip: 'Riwayat Pembayaran',
             icon: const Icon(Icons.history),
-            onPressed: () => Navigator.of(context)
-                .push(MaterialPageRoute(builder: (_) => const PembayaranScreen())),
+            onPressed: () => Navigator.of(
+              context,
+            ).push(MaterialPageRoute(builder: (_) => const PembayaranScreen())),
           ),
           const NotifikasiBellButton(),
         ],
@@ -43,6 +65,7 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
       body: RefreshIndicator(
         onRefresh: () async => ref.invalidate(tagihanListProvider),
         child: ListView(
+          controller: _scroll,
           padding: const EdgeInsets.all(16),
           children: [
             Row(
@@ -69,6 +92,14 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
               ],
             ),
             const SizedBox(height: 16),
+            if (_segment == 0) ...[
+              FilterPeriode(
+                periode: periode,
+                onChanged: (p) =>
+                    ref.read(periodeTagihanProvider.notifier).state = p,
+              ),
+              const SizedBox(height: 12),
+            ],
             if (_segment == 1)
               const Padding(
                 padding: EdgeInsets.only(top: 48),
@@ -84,41 +115,52 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                   padding: const EdgeInsets.only(top: 48),
                   child: Center(child: Text('Gagal memuat tagihan: $err')),
                 ),
-                data: (list) {
+                data: (daftar) {
+                  final list = daftar.items;
                   if (list.isEmpty) {
-                    return const Padding(
-                      padding: EdgeInsets.only(top: 48),
-                      child: Center(child: Text('Belum ada tagihan.')),
+                    return Padding(
+                      padding: const EdgeInsets.only(top: 48),
+                      child: Center(
+                        child: Text(
+                          periode == null
+                              ? 'Belum ada tagihan.'
+                              : 'Tidak ada tagihan pada periode ini.',
+                        ),
+                      ),
                     );
                   }
                   final terakhir = list.first;
                   return Column(
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
-                      Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text('Tagihan Terakhir', style: Theme.of(context).textTheme.bodySmall),
-                              const SizedBox(height: 4),
-                              Text(
-                                formatRupiah(terakhir.total),
-                                style: Theme.of(context)
-                                    .textTheme
-                                    .headlineSmall
-                                    ?.copyWith(fontWeight: FontWeight.bold),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${terakhir.nomorInvoice ?? terakhir.id} · ${terakhir.periode ?? '-'}',
-                                style: Theme.of(context).textTheme.bodySmall,
-                              ),
-                            ],
+                      if (periode == null)
+                        Card(
+                          child: Padding(
+                            padding: const EdgeInsets.all(16),
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  'Tagihan Terakhir',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  formatRupiah(terakhir.total),
+                                  style: Theme.of(context)
+                                      .textTheme
+                                      .headlineSmall
+                                      ?.copyWith(fontWeight: FontWeight.bold),
+                                ),
+                                const SizedBox(height: 2),
+                                Text(
+                                  '${terakhir.nomorInvoice ?? terakhir.id} · ${terakhir.periode ?? '-'}',
+                                  style: Theme.of(context).textTheme.bodySmall,
+                                ),
+                              ],
+                            ),
                           ),
                         ),
-                      ),
                       const SizedBox(height: 12),
                       ...list.map(
                         (tagihan) => Padding(
@@ -130,12 +172,15 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                 crossAxisAlignment: CrossAxisAlignment.start,
                                 children: [
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Expanded(
                                         child: Text(
                                           tagihan.nomorInvoice ?? tagihan.id,
-                                          style: Theme.of(context).textTheme.titleSmall,
+                                          style: Theme.of(
+                                            context,
+                                          ).textTheme.titleSmall,
                                         ),
                                       ),
                                       StatusBadge(status: tagihan.status),
@@ -143,29 +188,41 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                   ),
                                   Text(
                                     tagihan.periode ?? '-',
-                                    style: Theme.of(context).textTheme.bodySmall,
+                                    style: Theme.of(
+                                      context,
+                                    ).textTheme.bodySmall,
                                   ),
                                   const SizedBox(height: 12),
                                   Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                    mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
                                     children: [
                                       Text(
                                         formatRupiah(tagihan.total),
                                         style: Theme.of(context)
                                             .textTheme
                                             .titleMedium
-                                            ?.copyWith(fontWeight: FontWeight.bold),
+                                            ?.copyWith(
+                                              fontWeight: FontWeight.bold,
+                                            ),
                                       ),
                                       FilledButton.icon(
                                         style: FilledButton.styleFrom(
                                           backgroundColor: AppColors.brandGold,
                                         ),
-                                        onPressed: () => Navigator.of(context).push(
-                                          MaterialPageRoute(
-                                            builder: (_) => TagihanDetailScreen(id: tagihan.id),
-                                          ),
+                                        onPressed: () =>
+                                            Navigator.of(context).push(
+                                              MaterialPageRoute(
+                                                builder: (_) =>
+                                                    TagihanDetailScreen(
+                                                      id: tagihan.id,
+                                                    ),
+                                              ),
+                                            ),
+                                        icon: const Icon(
+                                          Icons.print_outlined,
+                                          size: 18,
                                         ),
-                                        icon: const Icon(Icons.print_outlined, size: 18),
                                         label: const Text('Print'),
                                       ),
                                     ],
@@ -175,6 +232,11 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                             ),
                           ),
                         ),
+                      ),
+                      PenutupDaftar(
+                        state: daftar,
+                        onCobaLagi: () =>
+                            ref.read(tagihanListProvider.notifier).muatLagi(),
                       ),
                     ],
                   );
@@ -215,17 +277,27 @@ class _TabTile extends StatelessWidget {
           color: Theme.of(context).colorScheme.surface,
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: selected ? AppColors.brandGold : Theme.of(context).colorScheme.outlineVariant,
+            color: selected
+                ? AppColors.brandGold
+                : Theme.of(context).colorScheme.outlineVariant,
             width: selected ? 2 : 1,
           ),
         ),
         child: Column(
           children: [
-            CircleAvatar(radius: 20, backgroundColor: iconBg, child: Icon(icon, color: Colors.white)),
+            CircleAvatar(
+              radius: 20,
+              backgroundColor: iconBg,
+              child: Icon(icon, color: Colors.white),
+            ),
             const SizedBox(height: 8),
             Text(
               label,
-              style: const TextStyle(fontWeight: FontWeight.bold, fontSize: 12, letterSpacing: 0.5),
+              style: const TextStyle(
+                fontWeight: FontWeight.bold,
+                fontSize: 12,
+                letterSpacing: 0.5,
+              ),
             ),
           ],
         ),

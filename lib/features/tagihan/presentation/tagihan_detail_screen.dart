@@ -32,8 +32,10 @@ class TagihanDetailScreen extends ConsumerWidget {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(detail.nomorInvoice ?? detail.id,
-                        style: Theme.of(context).textTheme.titleMedium),
+                    Text(
+                      detail.nomorInvoice ?? detail.id,
+                      style: Theme.of(context).textTheme.titleMedium,
+                    ),
                     Text(detail.periode ?? '-'),
                     const SizedBox(height: 8),
                     Text('Status: ${detail.status}'),
@@ -52,7 +54,10 @@ class TagihanDetailScreen extends ConsumerWidget {
             ),
             const Divider(),
             ListTile(
-              title: const Text('Total', style: TextStyle(fontWeight: FontWeight.bold)),
+              title: const Text(
+                'Total',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
               trailing: Text(
                 formatRupiah(detail.total),
                 style: const TextStyle(fontWeight: FontWeight.bold),
@@ -60,7 +65,10 @@ class TagihanDetailScreen extends ConsumerWidget {
             ),
             if (detail.pembayaran.isNotEmpty) ...[
               const SizedBox(height: 16),
-              Text('Riwayat Pembayaran', style: Theme.of(context).textTheme.titleSmall),
+              Text(
+                'Riwayat Pembayaran',
+                style: Theme.of(context).textTheme.titleSmall,
+              ),
               const SizedBox(height: 8),
               ...detail.pembayaran.map((p) => _BarisPembayaran(p)),
             ],
@@ -91,10 +99,15 @@ class _BarisPembayaran extends StatelessWidget {
         trailing: url == null
             ? null
             : OutlinedButton.icon(
-                style: OutlinedButton.styleFrom(minimumSize: const Size(0, 36), textStyle: const TextStyle(fontSize: 13)),
+                style: OutlinedButton.styleFrom(
+                  minimumSize: const Size(0, 36),
+                  textStyle: const TextStyle(fontSize: 13),
+                ),
                 onPressed: () async {
                   final uri = Uri.tryParse(url);
-                  if (uri != null) await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  if (uri != null) {
+                    await launchUrl(uri, mode: LaunchMode.externalApplication);
+                  }
                 },
                 icon: const Icon(Icons.print, size: 16),
                 label: const Text('Print'),
