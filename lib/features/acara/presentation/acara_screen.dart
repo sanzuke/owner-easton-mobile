@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/theme/app_colors.dart';
 import '../../../core/utils/formatters.dart';
+import '../../../core/widgets/galat_view.dart';
 import '../../../core/widgets/notifikasi_bell_button.dart';
 import '../application/acara_providers.dart';
 import '../data/acara_repository.dart';
@@ -22,26 +23,43 @@ class AcaraScreen extends ConsumerWidget {
         appBar: AppBar(
           title: const Text('Acara'),
           actions: const [NotifikasiBellButton()],
-          bottom: const TabBar(tabs: [Tab(text: 'Aktif'), Tab(text: 'Riwayat')]),
+          bottom: const TabBar(
+            tabs: [
+              Tab(text: 'Aktif'),
+              Tab(text: 'Riwayat'),
+            ],
+          ),
         ),
         body: listAsync.when(
+          skipLoadingOnReload: true,
           loading: () => const Center(child: CircularProgressIndicator()),
           error: (err, _) => RefreshIndicator(
-            onRefresh: () async => ref.invalidate(acaraListProvider),
-            child: ListView(children: const [
-              Padding(
-                padding: EdgeInsets.only(top: 64, left: 24, right: 24),
-                child: Center(child: Text('Acara tidak dapat dimuat. Tarik ke bawah untuk mencoba lagi.')),
-              ),
-            ]),
+            onRefresh: () => _muatUlang(ref),
+            child: GalatView(
+              error: err,
+              fallback: 'Acara tidak dapat dimuat. Tarik ke bawah atau tekan Coba lagi.',
+              onCoba: () => ref.invalidate(acaraListProvider),
+            ),
           ),
-          data: (d) => TabBarView(children: [
-            _Daftar(items: d.aktif, kosong: 'Belum ada acara aktif.'),
-            _Daftar(items: d.riwayat, kosong: 'Belum ada riwayat acara.'),
-          ]),
+          data: (d) => TabBarView(
+            children: [
+              _Daftar(items: d.aktif, kosong: 'Belum ada acara aktif.'),
+              _Daftar(items: d.riwayat, kosong: 'Belum ada riwayat acara.'),
+            ],
+          ),
         ),
       ),
     );
+  }
+}
+
+/// Muat ulang daftar dan tunggu selesai (indikator tarik-segarkan berhenti setelah data tiba).
+Future<void> _muatUlang(WidgetRef ref) async {
+  ref.invalidate(acaraListProvider);
+  try {
+    await ref.read(acaraListProvider.future);
+  } catch (_) {
+    // galat ditampilkan oleh state provider.
   }
 }
 
@@ -54,10 +72,11 @@ class _Daftar extends ConsumerWidget {
   @override
   Widget build(BuildContext context, WidgetRef ref) {
     return RefreshIndicator(
-      onRefresh: () async => ref.invalidate(acaraListProvider),
+      onRefresh: () => _muatUlang(ref),
       child: items.isEmpty
-          ? ListView(children: [Padding(padding: const EdgeInsets.only(top: 64), child: Center(child: Text(kosong)))])
+          ? KosongView(pesan: kosong, ikon: Icons.event_outlined)
           : ListView.separated(
+              physics: const AlwaysScrollableScrollPhysics(),
               padding: const EdgeInsets.all(16),
               itemCount: items.length,
               separatorBuilder: (context, index) => const SizedBox(height: 8),
@@ -76,9 +95,8 @@ class _AcaraCard extends StatelessWidget {
   Widget build(BuildContext context) {
     return Card(
       child: InkWell(
-        onTap: () => Navigator.of(context).push(
-          MaterialPageRoute<void>(builder: (_) => AcaraDetailScreen(kode: acara.kode)),
-        ),
+        onTap: () =>
+            Navigator.of(context).push(MaterialPageRoute<void>(builder: (_) => AcaraDetailScreen(kode: acara.kode))),
         child: Padding(
           padding: const EdgeInsets.all(16),
           child: Column(
@@ -87,26 +105,32 @@ class _AcaraCard extends StatelessWidget {
               Text(acara.nama, style: Theme.of(context).textTheme.titleMedium),
               const SizedBox(height: 8),
               if (acara.tglMulai != null)
-                Row(children: [
-                  const Icon(Icons.schedule, size: 16, color: Colors.grey),
-                  const SizedBox(width: 6),
-                  Text(formatTanggal(acara.tglMulai!)),
-                ]),
+                Row(
+                  children: [
+                    const Icon(Icons.schedule, size: 16, color: Colors.grey),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text(formatTanggal(acara.tglMulai!))),
+                  ],
+                ),
               if (acara.lokasi.isNotEmpty) ...[
                 const SizedBox(height: 4),
-                Row(children: [
-                  const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
-                  const SizedBox(width: 6),
-                  Expanded(child: Text(acara.lokasi)),
-                ]),
+                Row(
+                  children: [
+                    const Icon(Icons.location_on_outlined, size: 16, color: Colors.grey),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text(acara.lokasi)),
+                  ],
+                ),
               ],
               const SizedBox(height: 8),
               if (acara.sudahRsvp)
-                Row(children: [
-                  const Icon(Icons.check_circle, size: 16, color: AppColors.navyAccent),
-                  const SizedBox(width: 6),
-                  Text('Kehadiran: ${labelKehadiran(acara.kehadiran!)}'),
-                ])
+                Row(
+                  children: [
+                    const Icon(Icons.check_circle, size: 16, color: AppColors.navyAccent),
+                    const SizedBox(width: 6),
+                    Expanded(child: Text('Kehadiran: ${labelKehadiran(acara.kehadiran!)}')),
+                  ],
+                )
               else if (acara.status == 1 && acara.batasRsvp != null)
                 Text(
                   'Batas konfirmasi: ${formatTanggal(acara.batasRsvp!)}',
@@ -121,8 +145,8 @@ class _AcaraCard extends StatelessWidget {
 }
 
 String labelKehadiran(String k) => switch (k) {
-      'online' => 'Online',
-      'pemilik' => 'Offline (pemilik)',
-      'dikuasakan' => 'Offline (dikuasakan)',
-      _ => k,
-    };
+  'online' => 'Online',
+  'pemilik' => 'Offline (pemilik)',
+  'dikuasakan' => 'Offline (dikuasakan)',
+  _ => k,
+};

@@ -212,15 +212,20 @@ class _TagihanListScreenState extends ConsumerState<TagihanListScreen> {
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceBetween,
                                     children: [
-                                      Text(
-                                        formatRupiah(tagihan.total),
-                                        style: Theme.of(context)
-                                            .textTheme
-                                            .titleMedium
-                                            ?.copyWith(
-                                              fontWeight: FontWeight.bold,
-                                            ),
+                                      // Flexible: total besar / font besar tidak boleh mendorong tombol keluar layar.
+                                      Flexible(
+                                        child: Text(
+                                          formatRupiah(tagihan.total),
+                                          overflow: TextOverflow.ellipsis,
+                                          style: Theme.of(context)
+                                              .textTheme
+                                              .titleMedium
+                                              ?.copyWith(
+                                                fontWeight: FontWeight.bold,
+                                              ),
+                                        ),
                                       ),
+                                      const SizedBox(width: 8),
                                       FilledButton.icon(
                                         style: FilledButton.styleFrom(
                                           backgroundColor: AppColors.brandGold,

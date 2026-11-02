@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
 import '../../../core/providers/core_providers.dart';
@@ -21,4 +23,9 @@ final acaraQrProvider = FutureProvider.autoDispose.family<QrKehadiran, String>(
 
 final acaraVotingProvider = FutureProvider.autoDispose.family<DaftarVoting, String>(
   (ref, kode) => ref.watch(acaraRepositoryProvider).getVoting(kode),
+);
+
+/// Bytes gambar banner satu acara (hanya dipanggil bila `adaBanner`).
+final acaraBannerProvider = FutureProvider.autoDispose.family<Uint8List, String>(
+  (ref, kode) => ref.watch(acaraRepositoryProvider).getBanner(kode),
 );

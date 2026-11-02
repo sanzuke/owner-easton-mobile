@@ -1,3 +1,5 @@
+import 'dart:typed_data';
+
 import 'package:dio/dio.dart';
 
 import '../../../core/network/api_client.dart';
@@ -9,6 +11,16 @@ DateTime? _tgl(Object? v) {
   final s = v?.toString() ?? '';
   if (s.isEmpty || s.startsWith('0000')) return null;
   return DateTime.tryParse(s.replaceFirst(' ', 'T'));
+}
+
+/// Tipe dokumen acara pada `GET /acara/{kode}/dokumen/{tipe}`.
+enum JenisDokumenAcara {
+  undangan('Undangan'),
+  tatib('Tata Tertib'),
+  materi('Materi');
+
+  const JenisDokumenAcara(this.label);
+  final String label;
 }
 
 /// Ringkasan satu acara (item `aktif`/`riwayat` pada `GET /acara`).
@@ -24,6 +36,7 @@ class Acara {
   final int status; // 1 aktif, 2 selesai
   final String? kehadiran; // online|pemilik|dikuasakan, null = belum RSVP
   final String? mode;
+  final bool adaBanner;
 
   const Acara({
     required this.kode,
@@ -37,37 +50,40 @@ class Acara {
     this.status = 1,
     this.kehadiran,
     this.mode,
+    this.adaBanner = false,
   });
 
   bool get sudahRsvp => kehadiran != null && kehadiran!.isNotEmpty;
 
   Acara conKehadiran(String? k) => Acara(
-        kode: kode,
-        nama: nama,
-        deskripsi: deskripsi,
-        lokasi: lokasi,
-        linkOnline: linkOnline,
-        tglMulai: tglMulai,
-        tglSelesai: tglSelesai,
-        batasRsvp: batasRsvp,
-        status: status,
-        kehadiran: k,
-        mode: mode,
-      );
+    kode: kode,
+    nama: nama,
+    deskripsi: deskripsi,
+    lokasi: lokasi,
+    linkOnline: linkOnline,
+    tglMulai: tglMulai,
+    tglSelesai: tglSelesai,
+    batasRsvp: batasRsvp,
+    status: status,
+    kehadiran: k,
+    mode: mode,
+    adaBanner: adaBanner,
+  );
 
   factory Acara.fromJson(Map<String, dynamic> j) => Acara(
-        kode: j['kode']?.toString() ?? '',
-        nama: j['nama']?.toString() ?? '-',
-        deskripsi: j['deskripsi']?.toString() ?? '',
-        lokasi: j['lokasi']?.toString() ?? '',
-        linkOnline: (j['link_online']?.toString().isNotEmpty ?? false) ? j['link_online'].toString() : null,
-        tglMulai: _tgl(j['tgl_mulai']),
-        tglSelesai: _tgl(j['tgl_selesai']),
-        batasRsvp: _tgl(j['batas_rsvp']),
-        status: int.tryParse(j['status']?.toString() ?? '') ?? 1,
-        kehadiran: j['kehadiran']?.toString(),
-        mode: j['mode']?.toString(),
-      );
+    kode: j['kode']?.toString() ?? '',
+    nama: j['nama']?.toString() ?? '-',
+    deskripsi: j['deskripsi']?.toString() ?? '',
+    lokasi: j['lokasi']?.toString() ?? '',
+    linkOnline: (j['link_online']?.toString().isNotEmpty ?? false) ? j['link_online'].toString() : null,
+    tglMulai: _tgl(j['tgl_mulai']),
+    tglSelesai: _tgl(j['tgl_selesai']),
+    batasRsvp: _tgl(j['batas_rsvp']),
+    status: int.tryParse(j['status']?.toString() ?? '') ?? 1,
+    kehadiran: j['kehadiran']?.toString(),
+    mode: j['mode']?.toString(),
+    adaBanner: j['ada_banner'] == true,
+  );
 }
 
 class DaftarAcara {
@@ -75,10 +91,8 @@ class DaftarAcara {
   final List<Acara> riwayat;
   const DaftarAcara({this.aktif = const [], this.riwayat = const []});
 
-  factory DaftarAcara.fromJson(Map<String, dynamic> j) => DaftarAcara(
-        aktif: _list(j['aktif']),
-        riwayat: _list(j['riwayat']),
-      );
+  factory DaftarAcara.fromJson(Map<String, dynamic> j) =>
+      DaftarAcara(aktif: _list(j['aktif']), riwayat: _list(j['riwayat']));
 
   static List<Acara> _list(Object? v) =>
       (v as List? ?? const []).map((e) => Acara.fromJson(e as Map<String, dynamic>)).toList(growable: false);
@@ -109,16 +123,16 @@ class PesertaAcara {
   });
 
   factory PesertaAcara.fromJson(Map<String, dynamic> j) => PesertaAcara(
-        kehadiran: j['kehadiran']?.toString() ?? '',
-        mode: j['mode']?.toString() ?? '',
-        namaHadir: j['nama_hadir']?.toString() ?? '',
-        namaWakil: j['nama_wakil']?.toString() ?? '',
-        adaSuratKuasa: j['ada_surat_kuasa'] == true,
-        adaKtpWakil: j['ada_ktp_wakil'] == true,
-        adaSuratIzinHuni: j['ada_surat_izin_huni'] == true,
-        punyaQr: j['punya_qr'] == true,
-        sudahCheckin: (int.tryParse(j['checkin_status']?.toString() ?? '') ?? 0) > 0,
-      );
+    kehadiran: j['kehadiran']?.toString() ?? '',
+    mode: j['mode']?.toString() ?? '',
+    namaHadir: j['nama_hadir']?.toString() ?? '',
+    namaWakil: j['nama_wakil']?.toString() ?? '',
+    adaSuratKuasa: j['ada_surat_kuasa'] == true,
+    adaKtpWakil: j['ada_ktp_wakil'] == true,
+    adaSuratIzinHuni: j['ada_surat_izin_huni'] == true,
+    punyaQr: j['punya_qr'] == true,
+    sudahCheckin: (int.tryParse(j['checkin_status']?.toString() ?? '') ?? 0) > 0,
+  );
 }
 
 class DetailAcara {
@@ -172,11 +186,11 @@ class QrKehadiran {
   const QrKehadiran({required this.token, required this.kodeAcara, required this.kodeUnit, this.sudahCheckin = false});
 
   factory QrKehadiran.fromJson(Map<String, dynamic> j) => QrKehadiran(
-        token: j['qr_token']?.toString() ?? '',
-        kodeAcara: j['kode_acara']?.toString() ?? '',
-        kodeUnit: j['kode_unit']?.toString() ?? '',
-        sudahCheckin: (int.tryParse(j['checkin_status']?.toString() ?? '') ?? 0) > 0,
-      );
+    token: j['qr_token']?.toString() ?? '',
+    kodeAcara: j['kode_acara']?.toString() ?? '',
+    kodeUnit: j['kode_unit']?.toString() ?? '',
+    sudahCheckin: (int.tryParse(j['checkin_status']?.toString() ?? '') ?? 0) > 0,
+  );
 }
 
 class OpsiVoting {
@@ -214,19 +228,19 @@ class Voting {
   });
 
   factory Voting.fromJson(Map<String, dynamic> j) => Voting(
-        id: int.tryParse(j['id_voting']?.toString() ?? '') ?? 0,
-        pertanyaan: j['pertanyaan']?.toString() ?? '',
-        multi: (j['tipe']?.toString() ?? 'single') != 'single',
-        buka: j['buka'] == true,
-        labelTutup: j['label_tutup']?.toString(),
-        alasanTutup: j['alasan_tutup']?.toString(),
-        tampilHasil: j['tampil_hasil'] == true,
-        sudah: j['sudah'] == true,
-        pilihan: (j['pilihan'] as List? ?? const []).map((e) => int.tryParse(e.toString()) ?? 0).toList(growable: false),
-        opsi: (j['opsi'] as List? ?? const [])
-            .map((e) => OpsiVoting.fromJson(e as Map<String, dynamic>))
-            .toList(growable: false),
-      );
+    id: int.tryParse(j['id_voting']?.toString() ?? '') ?? 0,
+    pertanyaan: j['pertanyaan']?.toString() ?? '',
+    multi: (j['tipe']?.toString() ?? 'single') != 'single',
+    buka: j['buka'] == true,
+    labelTutup: j['label_tutup']?.toString(),
+    alasanTutup: j['alasan_tutup']?.toString(),
+    tampilHasil: j['tampil_hasil'] == true,
+    sudah: j['sudah'] == true,
+    pilihan: (j['pilihan'] as List? ?? const []).map((e) => int.tryParse(e.toString()) ?? 0).toList(growable: false),
+    opsi: (j['opsi'] as List? ?? const [])
+        .map((e) => OpsiVoting.fromJson(e as Map<String, dynamic>))
+        .toList(growable: false),
+  );
 }
 
 class DaftarVoting {
@@ -235,11 +249,11 @@ class DaftarVoting {
   const DaftarVoting({this.sudahRsvp = false, this.votings = const []});
 
   factory DaftarVoting.fromJson(Map<String, dynamic> j) => DaftarVoting(
-        sudahRsvp: j['sudah_rsvp'] == true,
-        votings: (j['votings'] as List? ?? const [])
-            .map((e) => Voting.fromJson(e as Map<String, dynamic>))
-            .toList(growable: false),
-      );
+    sudahRsvp: j['sudah_rsvp'] == true,
+    votings: (j['votings'] as List? ?? const [])
+        .map((e) => Voting.fromJson(e as Map<String, dynamic>))
+        .toList(growable: false),
+  );
 }
 
 class HasilVoting {
@@ -247,15 +261,18 @@ class HasilVoting {
   final List<({String teks, int jml})> opsi;
   const HasilVoting({this.pemilih = 0, this.opsi = const []});
 
+  /// Bagian suara [jml] terhadap jumlah pemilih (0..1). Voting multi-pilihan: satu pemilih bisa
+  /// memilih beberapa opsi, jadi pembaginya `pemilih`, bukan jumlah semua suara.
+  double bagian(int jml) => pemilih <= 0 ? 0 : (jml / pemilih).clamp(0.0, 1.0);
+
   factory HasilVoting.fromJson(Map<String, dynamic> j) => HasilVoting(
-        pemilih: int.tryParse(j['pemilih']?.toString() ?? '') ?? 0,
-        opsi: (j['opsi'] as List? ?? const [])
-            .map((e) => (
-                  teks: (e as Map)['teks_opsi']?.toString() ?? '',
-                  jml: int.tryParse(e['jml']?.toString() ?? '') ?? 0,
-                ))
-            .toList(growable: false),
-      );
+    pemilih: int.tryParse(j['pemilih']?.toString() ?? '') ?? 0,
+    opsi: (j['opsi'] as List? ?? const [])
+        .map(
+          (e) => (teks: (e as Map)['teks_opsi']?.toString() ?? '', jml: int.tryParse(e['jml']?.toString() ?? '') ?? 0),
+        )
+        .toList(growable: false),
+  );
 }
 
 class AcaraRepository {
@@ -308,6 +325,12 @@ class AcaraRepository {
     return res.message;
   }
 
+  /// Gambar banner (butuh header Authorization, jadi diunduh sebagai bytes).
+  Future<Uint8List> getBanner(String kode) => _api.getBytes('/acara/$kode/banner');
+
+  Future<Uint8List> getDokumen(String kode, JenisDokumenAcara tipe) =>
+      _api.getBytes('/acara/$kode/dokumen/${tipe.name}');
+
   Future<DaftarVoting> getVoting(String kode) async {
     final res = await _api.get<DaftarVoting>(
       '/acara/$kode/voting',
@@ -317,10 +340,7 @@ class AcaraRepository {
   }
 
   Future<String> kirimSuara(int idVoting, List<int> opsi) async {
-    final res = await _api.post<Object?>(
-      '/acara/voting/$idVoting/suara',
-      data: {'opsi': opsi},
-    );
+    final res = await _api.post<Object?>('/acara/voting/$idVoting/suara', data: {'opsi': opsi});
     return res.message;
   }
 
