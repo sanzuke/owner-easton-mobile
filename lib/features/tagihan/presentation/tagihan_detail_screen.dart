@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/status_badge.dart';
+import '../../qris/presentation/qris_screen.dart';
 import '../../va/presentation/va_screen.dart';
 import '../application/tagihan_providers.dart';
 import '../data/tagihan_repository.dart';
@@ -75,6 +76,14 @@ class TagihanDetailScreen extends ConsumerWidget {
                 ),
                 icon: const Icon(Icons.account_balance, size: 18),
                 label: const Text('Bayar via VA'),
+              ),
+              const SizedBox(height: 8),
+              OutlinedButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(builder: (_) => const QrisScreen()),
+                ),
+                icon: const Icon(Icons.qr_code_2, size: 18),
+                label: const Text('Bayar via QRIS'),
               ),
             ],
             if (detail.pembayaran.isNotEmpty) ...[
