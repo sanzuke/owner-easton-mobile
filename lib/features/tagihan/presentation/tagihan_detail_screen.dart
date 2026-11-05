@@ -5,6 +5,7 @@ import 'package:url_launcher/url_launcher.dart';
 
 import '../../../core/utils/formatters.dart';
 import '../../../core/widgets/status_badge.dart';
+import '../../va/presentation/va_screen.dart';
 import '../application/tagihan_providers.dart';
 import '../data/tagihan_repository.dart';
 
@@ -64,6 +65,18 @@ class TagihanDetailScreen extends ConsumerWidget {
                 style: const TextStyle(fontWeight: FontWeight.bold),
               ),
             ),
+            if (detail.total > 0) ...[
+              const SizedBox(height: 8),
+              FilledButton.icon(
+                onPressed: () => Navigator.of(context).push(
+                  MaterialPageRoute(
+                    builder: (_) => VaScreen(idBilling: detail.id),
+                  ),
+                ),
+                icon: const Icon(Icons.account_balance, size: 18),
+                label: const Text('Bayar via VA'),
+              ),
+            ],
             if (detail.pembayaran.isNotEmpty) ...[
               const SizedBox(height: 16),
               Text(
