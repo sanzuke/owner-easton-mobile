@@ -1,20 +1,55 @@
 import '../../../core/network/api_client.dart';
 
+/// Kelompok tampil kategori P3SRS (`kelompok` pada `GET /p3srs/kategori`).
+enum KelompokP3srs { utama, dokumen }
+
 /// Kategori P3SRS — `GET /p3srs/kategori` (docs/96b §9d). `jenis` = laporan untuk kategori laporan
-/// keuangan bulanan, selain itu artikel.
+/// keuangan bulanan, selain itu artikel. Field [namaCms], [deskripsi], [ikon], [kelompok], [terakhir]
+/// hanya ada di API baru; server lama tidak mengirimnya (semua null).
 class KategoriP3srs {
   final int id;
   final String nama;
   final bool laporan;
   final int total;
+  final String? namaCms;
+  final String? deskripsi;
+  final String? ikon;
+  final KelompokP3srs? kelompok;
 
-  const KategoriP3srs({required this.id, required this.nama, required this.laporan, required this.total});
+  /// Tanggal artikel terbaru (`Y-m-d`); null bila kategori kosong atau server lama.
+  final String? terakhir;
+
+  const KategoriP3srs({
+    required this.id,
+    required this.nama,
+    required this.laporan,
+    required this.total,
+    this.namaCms,
+    this.deskripsi,
+    this.ikon,
+    this.kelompok,
+    this.terakhir,
+  });
+
+  static String? _teksAtauNull(Object? v) {
+    final s = v?.toString().trim();
+    return s == null || s.isEmpty ? null : s;
+  }
 
   factory KategoriP3srs.fromJson(Map<String, dynamic> json) => KategoriP3srs(
         id: int.tryParse(json['id_kategori']?.toString() ?? '') ?? 0,
         nama: json['nama']?.toString() ?? '-',
         laporan: json['jenis'] == 'laporan',
         total: int.tryParse(json['total']?.toString() ?? '') ?? 0,
+        namaCms: _teksAtauNull(json['nama_cms']),
+        deskripsi: _teksAtauNull(json['deskripsi']),
+        ikon: _teksAtauNull(json['ikon']),
+        kelompok: switch (json['kelompok']?.toString()) {
+          'utama' => KelompokP3srs.utama,
+          'dokumen' => KelompokP3srs.dokumen,
+          _ => null,
+        },
+        terakhir: _teksAtauNull(json['terakhir']),
       );
 }
 

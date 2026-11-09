@@ -6,6 +6,7 @@ import 'package:owner_easton_mobile/features/p3srs/application/p3srs_providers.d
 import 'package:owner_easton_mobile/features/p3srs/data/p3srs_repository.dart';
 import 'package:owner_easton_mobile/features/p3srs/presentation/artikel_detail_screen.dart';
 import 'package:owner_easton_mobile/features/p3srs/presentation/laporan_screen.dart';
+import 'package:owner_easton_mobile/features/p3srs/presentation/p3srs_screen.dart';
 
 // JSON mengikuti GET /api/v1/p3srs/* (docs/96b §9d).
 void main() {
@@ -85,5 +86,113 @@ void main() {
     expect(find.text('Laporan belum tersedia untuk bulan ini.'), findsNothing);
     expect(find.byWidgetPredicate((w) => w is RichText && w.text.toPlainText().contains('Total Pemasukan')), findsOneWidget);
     expect(find.text('5 unit membaca'), findsOneWidget);
+  });
+
+  group('menu P3SRS tertata', () {
+    // Respons API baru (kontrak kelompok utama/dokumen), urutan sudah final dari server.
+    final responsBaru = <Map<String, dynamic>>[
+      {'id_kategori': 1, 'nama': 'Informasi', 'nama_cms': 'Informasi', 'deskripsi': 'Informasi dan pengumuman pengelolaan untuk pemilik', 'ikon': 'info', 'kelompok': 'utama', 'jenis': 'artikel', 'total': 2, 'terakhir': '2026-10-05'},
+      {'id_kategori': 2, 'nama': 'Laporan Kegiatan Pengelolaan', 'nama_cms': 'Laporan Kegiatan', 'deskripsi': 'Ringkasan kegiatan pengelolaan kawasan', 'ikon': 'kegiatan', 'kelompok': 'utama', 'jenis': 'artikel', 'total': 0, 'terakhir': null},
+      {'id_kategori': 9, 'nama': 'Laporan Keuangan Bulanan', 'nama_cms': 'Laporan Kuangan Bulanan', 'deskripsi': 'Laporan pemasukan dan pengeluaran per bulan', 'ikon': 'keuangan', 'kelompok': 'utama', 'jenis': 'laporan', 'total': 0, 'terakhir': null},
+      {'id_kategori': 10, 'nama': 'Administrasi & Legalitas', 'nama_cms': 'Administrai & Legalitas', 'deskripsi': null, 'ikon': 'dokumen', 'kelompok': 'dokumen', 'jenis': 'artikel', 'total': 3, 'terakhir': '2026-03-01'},
+      {'id_kategori': 30, 'nama': 'Kategori Baru', 'nama_cms': 'Kategori Baru', 'deskripsi': '', 'ikon': 'dokumen', 'kelompok': 'dokumen', 'jenis': 'artikel', 'total': 1, 'terakhir': '2026-01-02'},
+    ];
+    // Respons server lama: tanpa nama_cms/deskripsi/ikon/kelompok/terakhir.
+    final responsLama = <Map<String, dynamic>>[
+      {'id_kategori': 1, 'nama': 'Informasi', 'jenis': 'artikel', 'total': 4},
+      {'id_kategori': 9, 'nama': 'Laporan Kuangan Bulanan', 'jenis': 'laporan', 'total': 0},
+    ];
+
+    Future<void> pasang(WidgetTester tester, List<Map<String, dynamic>> json, {List<Override> extra = const []}) async {
+      tester.view.physicalSize = const Size(800, 3000);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+      final kategori = json.map(KategoriP3srs.fromJson).toList();
+      await tester.pumpWidget(ProviderScope(
+        overrides: [p3srsKategoriProvider.overrideWith((ref) async => kategori), ...extra],
+        child: const MaterialApp(home: P3srsScreen()),
+      ));
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    }
+
+    test('model: field baru opsional, tanpa field baru tidak crash', () {
+      final baru = KategoriP3srs.fromJson(responsBaru[0]);
+      expect(baru.kelompok, KelompokP3srs.utama);
+      expect(baru.ikon, 'info');
+      expect(baru.namaCms, 'Informasi');
+      expect(baru.terakhir, '2026-10-05');
+      expect(KategoriP3srs.fromJson(responsBaru[1]).terakhir, isNull);
+      expect(KategoriP3srs.fromJson(responsBaru[4]).deskripsi, isNull, reason: 'deskripsi kosong dianggap tidak ada');
+
+      final lama = KategoriP3srs.fromJson(responsLama[0]);
+      expect(lama.kelompok, isNull);
+      expect(lama.deskripsi, isNull);
+      expect(lama.ikon, isNull);
+      expect(lama.terakhir, isNull);
+      expect(KategoriP3srs.fromJson({'id_kategori': 5, 'kelompok': 'aneh'}).kelompok, isNull);
+    });
+
+    testWidgets('respons baru: dua bagian berurutan dengan label, deskripsi, jumlah, terakhir diperbarui', (tester) async {
+      await pasang(tester, responsBaru);
+
+      expect(find.text('Informasi & Laporan'), findsOneWidget);
+      expect(find.text('Dokumen Legalitas & Lainnya'), findsOneWidget);
+      expect(tester.getTopLeft(find.text('Informasi & Laporan')).dy,
+          lessThan(tester.getTopLeft(find.text('Dokumen Legalitas & Lainnya')).dy));
+
+      // urutan kartu mengikuti server; label menggantikan nama CMS
+      final urutan = ['Informasi', 'Laporan Kegiatan Pengelolaan', 'Laporan Keuangan Bulanan', 'Administrasi & Legalitas', 'Kategori Baru'];
+      final ys = [for (final n in urutan) tester.getTopLeft(find.text(n)).dy];
+      expect(ys, orderedEquals([...ys]..sort()));
+      expect(find.text('Laporan Kuangan Bulanan'), findsNothing);
+      expect(find.text('Administrai & Legalitas'), findsNothing);
+
+      expect(find.text('Informasi dan pengumuman pengelolaan untuk pemilik'), findsOneWidget);
+      expect(find.text('2 dokumen · Terakhir diperbarui 05 Okt 2026'), findsOneWidget);
+      expect(find.text('3 dokumen · Terakhir diperbarui 01 Mar 2026'), findsOneWidget);
+      expect(find.byIcon(Icons.info_outline_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.fact_check_outlined), findsNothing);
+      expect(find.byIcon(Icons.event_note_outlined), findsOneWidget);
+    });
+
+    testWidgets('kategori tanpa terakhir/total 0 tidak error: "Belum ada dokumen"; laporan tanpa jumlah', (tester) async {
+      await pasang(tester, responsBaru);
+
+      expect(find.text('Belum ada dokumen'), findsOneWidget); // id 2, total 0, terakhir null
+      expect(find.textContaining('Terakhir diperbarui'), findsNWidgets(3)); // hanya yang punya tanggal
+      // kartu laporan: deskripsi saja, tanpa jumlah/terakhir
+      expect(find.text('Laporan pemasukan dan pengeluaran per bulan'), findsOneWidget);
+      expect(find.text('0 dokumen'), findsNothing);
+    });
+
+    testWidgets('respons lama tanpa field baru: daftar datar seperti sebelumnya', (tester) async {
+      await pasang(tester, responsLama);
+
+      expect(find.text('Informasi & Laporan'), findsNothing);
+      expect(find.text('Dokumen Legalitas & Lainnya'), findsNothing);
+      expect(find.text('Semua artikel'), findsOneWidget);
+      expect(find.text('Informasi'), findsOneWidget);
+      expect(find.text('4 artikel'), findsOneWidget);
+      expect(find.text('Laporan Kuangan Bulanan'), findsOneWidget);
+      expect(find.text('Laporan pemasukan & pengeluaran bulanan'), findsOneWidget);
+      expect(find.byIcon(Icons.bar_chart_rounded), findsOneWidget);
+      expect(find.byIcon(Icons.folder_open_outlined), findsOneWidget);
+    });
+
+    testWidgets('kategori jenis laporan tetap membuka layar laporan', (tester) async {
+      final now = DateTime.now();
+      final bulanIni = '${now.year}-${now.month.toString().padLeft(2, '0')}';
+      final laporan = p3srsLaporanProvider(bulanIni).overrideWith((ref) async => LaporanP3srs(bulan: bulanIni, tersedia: false));
+
+      for (final json in [responsBaru, responsLama]) {
+        await pasang(tester, json, extra: [laporan]);
+        await tester.tap(find.textContaining(RegExp('Laporan (Keuangan|Kuangan) Bulanan')));
+        await tester.pumpAndSettle();
+        expect(tester.takeException(), isNull);
+        expect(find.byType(LaporanScreen), findsOneWidget);
+        expect(find.text('Laporan belum tersedia untuk bulan ini.'), findsOneWidget);
+      }
+    });
   });
 }

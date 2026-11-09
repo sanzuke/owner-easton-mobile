@@ -344,3 +344,16 @@ polos sekarang ditutup: `UnitPickerField` (ketik ≥1 karakter → debounce 350m
 field → pilih → `id_bast` terisi otomatis), persis pola dropdown di desain resmi. File baru:
 `lib/features/auth/data/unit_repository.dart` (model `Unit` + `search()`),
 `lib/features/auth/presentation/unit_picker_field.dart`. `flutter analyze` bersih.
+
+## Update 9 November 2026 — Menu P3SRS bergrup (permintaan BM Easton)
+
+Tab P3SRS menata kategori jadi dua bagian: **"Informasi & Laporan"** (kelompok `utama`: Informasi,
+Laporan Kegiatan Pengelolaan, Laporan Keuangan Bulanan, 3 Bulan, Tahunan Audited) lalu **"Dokumen
+Legalitas & Lainnya"** (kelompok `dokumen`, termasuk kategori CMS baru). Perilaku sama dgn portal web owner.
+Sumber: `GET /p3srs/kategori` mengirim per item `nama` (label tampil), `nama_cms`, `deskripsi`, `ikon`
+(`info|kegiatan|keuangan|kalender|audit|dokumen` → `Icons.*`), `kelompok`, `total` (artikel terbit), `terakhir`
+(`Y-m-d`), urutan final dari server. Kartu menampilkan ikon, nama, deskripsi, "N dokumen" (atau "Belum ada
+dokumen") dan "Terakhir diperbarui dd MMM yyyy"; kartu `jenis: laporan` hanya deskripsi dan tetap membuka
+laporan In/Out bulanan. **Fallback:** respons tanpa `kelompok` (server lama) tetap tampil daftar datar
+seperti sebelumnya; semua field baru opsional di `KategoriP3srs.fromJson`. File:
+`lib/features/p3srs/data/p3srs_repository.dart`, `presentation/p3srs_screen.dart`, tes di `test/p3srs_test.dart`.
