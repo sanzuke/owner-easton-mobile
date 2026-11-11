@@ -13,6 +13,7 @@ import 'package:owner_easton_mobile/features/dashboard/presentation/dashboard_sc
 import 'package:owner_easton_mobile/features/notifikasi/application/notifikasi_providers.dart';
 import 'package:owner_easton_mobile/features/p3srs/application/p3srs_providers.dart';
 import 'package:owner_easton_mobile/features/p3srs/data/p3srs_repository.dart';
+import 'package:owner_easton_mobile/features/qris/presentation/qris_screen.dart';
 
 class _PilihanTetap extends TampilanPilihanNotifier {
   _PilihanTetap(this._nilai);
@@ -59,6 +60,20 @@ Future<void> _pasang(
 
 void main() {
   final belumLunas = TagihanTerbaru(idBilling: 7, jatuhTempo: DateTime(2031, 8, 10), total: 1250000, lunas: false);
+
+  testWidgets('kartu Bayar via QRIS tampil di beranda (Nyaman) dan membuka layar QRIS', (tester) async {
+    await _pasang(tester, _ringkasan(lahir: DateTime(1960, 5, 2), tagihan: belumLunas));
+    expect(find.text('Bayar via QRIS'), findsOneWidget);
+    expect(find.text('Scan dari m-banking atau e-wallet'), findsOneWidget);
+    await tester.tap(find.text('Bayar via QRIS'));
+    await tester.pumpAndSettle();
+    expect(find.byType(QrisScreen), findsOneWidget);
+  });
+
+  testWidgets('kartu Bayar via QRIS juga tampil di tema Modern', (tester) async {
+    await _pasang(tester, _ringkasan(lahir: DateTime(1995, 3, 3), tagihan: belumLunas));
+    expect(find.text('Bayar via QRIS'), findsOneWidget);
+  });
 
   testWidgets('Nyaman: sapaan Bapak, unit, tagihan, tombol bayar dan 6 kartu fitur', (tester) async {
     await _pasang(tester, _ringkasan(lahir: DateTime(1960, 5, 2), tagihan: belumLunas));

@@ -15,6 +15,7 @@ import '../../notifikasi/presentation/notifikasi_screen.dart';
 import '../../p3srs/application/p3srs_providers.dart';
 import '../../p3srs/presentation/berita_beranda.dart';
 import '../../pembayaran/presentation/pembayaran_screen.dart';
+import '../../qris/presentation/qris_screen.dart';
 import '../../tagihan/presentation/tagihan_detail_screen.dart';
 import '../application/dashboard_providers.dart';
 import '../application/tampilan_providers.dart';
@@ -75,6 +76,7 @@ class DashboardScreen extends ConsumerWidget {
                     crossAxisAlignment: CrossAxisAlignment.stretch,
                     children: [
                       _BillCard(summary: s, p: p),
+                      _QrisBeranda(p: p),
                       _AcaraBanner(p: p),
                       const SizedBox(height: 14),
                       _SectionLabel(p: p),
@@ -401,6 +403,69 @@ class _StatusBadge extends StatelessWidget {
             style: TextStyle(color: fg, fontSize: p.modern ? 10.5 : 12.5, fontWeight: FontWeight.w800),
           ),
         ],
+      ),
+    );
+  }
+}
+
+/// Pintasan "Bayar via QRIS" di beranda (BM 9 Nov 2026, CR-09). Menuju layar QRIS yang sama dengan tombol di detail tagihan.
+/// Info cashback belum ditampilkan: aturannya belum ditetapkan Finance/BM.
+class _QrisBeranda extends StatelessWidget {
+  const _QrisBeranda({required this.p});
+
+  final DashPalette p;
+
+  @override
+  Widget build(BuildContext context) {
+    final radius = BorderRadius.circular(p.modern ? 12 : 16);
+    return Padding(
+      padding: const EdgeInsets.only(top: 12),
+      child: Semantics(
+        button: true,
+        label: 'Bayar via QRIS',
+        child: Material(
+          color: p.surface,
+          borderRadius: radius,
+          child: InkWell(
+            borderRadius: radius,
+            onTap: () => Navigator.of(context).push(MaterialPageRoute(builder: (_) => const QrisScreen())),
+            child: Container(
+              padding: const EdgeInsets.symmetric(horizontal: 14, vertical: 12),
+              decoration: BoxDecoration(borderRadius: radius, border: Border.all(color: p.primary.withValues(alpha: 0.5))),
+              child: Row(
+                children: [
+                  Container(
+                    width: p.modern ? 36 : 44,
+                    height: p.modern ? 36 : 44,
+                    decoration: BoxDecoration(
+                      color: p.modern ? p.primary.withValues(alpha: 0.16) : p.surfaceTonal,
+                      borderRadius: BorderRadius.circular(p.modern ? 10 : 13),
+                    ),
+                    child: Icon(Icons.qr_code_2_rounded, size: p.modern ? 22 : 28, color: p.primary),
+                  ),
+                  const SizedBox(width: 12),
+                  Expanded(
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text(
+                          'Bayar via QRIS',
+                          style: TextStyle(color: p.ink, fontSize: p.modern ? 14 : 16, fontWeight: FontWeight.w800),
+                        ),
+                        const SizedBox(height: 2),
+                        Text(
+                          'Scan dari m-banking atau e-wallet',
+                          style: TextStyle(color: p.inkSoft, fontSize: p.modern ? 11 : 13, height: 1.3),
+                        ),
+                      ],
+                    ),
+                  ),
+                  Icon(Icons.chevron_right_rounded, color: p.inkFaint),
+                ],
+              ),
+            ),
+          ),
+        ),
       ),
     );
   }
